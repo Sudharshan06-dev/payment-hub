@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.userservice.models.Accounts;
 import com.userservice.models.Users;
 import com.userservice.services.UsersService;
 
@@ -91,21 +89,6 @@ public class UsersController {
     public ResponseEntity<List<Users>> getAllActiveUsers() {
         List<Users> users = usersService.getAllActiveUsers();
         return ResponseEntity.ok(users);
-    }
-
-    /**
-     * POST /api/v1/users
-     * Create a new user
-     */
-    @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody Users user) {
-        try {
-            // Service handles ALL validation and business logic
-            Users savedUser = usersService.registerUser(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
     }
 
     /**

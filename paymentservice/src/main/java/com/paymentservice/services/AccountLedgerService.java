@@ -112,8 +112,8 @@ public class AccountLedgerService {
      * Get current balance (credits - debits)
      */
     public Double getCurrentBalance(Long accountId) {
-        Double credits = getTotalCredits(accountId);
-        Double debits = getTotalDebits(accountId);
+        Double credits = this.getTotalCredits(accountId);
+        Double debits = this.getTotalDebits(accountId);
         return credits - debits;
     }
 }

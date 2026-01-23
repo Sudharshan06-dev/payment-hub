@@ -1,63 +1,29 @@
 package com.userservice.services;
-
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.userservice.models.Users;
 import com.userservice.repositories.UsersRepository;
 
-/**
- * UserService - Business Logic Layer
- * 
- *  CORRECT APPROACH:
- * - Service is THICK - contains ALL business logic
- * - Service performs ALL validation
- * - Service handles transactions
- * - Service calls Repository for database operations
- * - Controller NEVER calls Repository directly
- * 
- * Flow: Controller → Service → Repository → Database
- */
+
 @Service
 @Transactional // All methods are transactional by default
-public class UsersService {
+public class UsersService implements UserDetailsService {
 
     @Autowired
-    private UsersRepository userRepository;
+    private UsersRepository usersRepository;
 
-    // ==================== USER OPERATIONS ====================
+    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    /**
-     * Get user by ID
-     *  Validates user exists, throws exception if not
-     */
-    public Users getUserById(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-    }
-
-    /**
-     * Get user by email
-     *  Throws exception if not found
-     */
-    public Users getUserByEmailOrThrow(String email) {
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-    }
-
-    /**
-     * Get user by username
-     *  Throws exception if not found
-     */
-    public Users getUserByUsernameOrThrow(String username) {
-        return userRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
-    }
 
     /**
      * Register a new user
@@ -70,21 +36,22 @@ public class UsersService {
     public Users registerUser(Users user) {
 
         //  Validation 1: Email must not already exist
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (usersRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already registered: " + user.getEmail());
         }
 
         //  Validation 2: Username must not already exist
-        if (userRepository.existsByUsername(user.getUsername())) {
+        if (usersRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("Username already taken: " + user.getUsername());
         }
 
-        //  Validation 3: Password must be bcrypt hashed (minimum 60 characters for bcrypt)
-        if (user.getPasswordHash() == null || user.getPasswordHash().length() < 60) {
-            throw new RuntimeException(
-                "Password must be hashed with bcrypt (minimum 60 chars). " +
-                "Never store plain text passwords!"
-            );
+        //  Validation 3: Password must be provided and meet minimum requirements
+        if (user.getPasswordHash() == null || user.getPasswordHash().trim().isEmpty()) {
+            throw new RuntimeException("Password is required");
+        }
+        
+        if (user.getPasswordHash().length() < 6) {
+            throw new RuntimeException("Password must be at least 6 characters");
         }
 
         //  Validation 4: First/Last name required
@@ -101,8 +68,55 @@ public class UsersService {
             throw new RuntimeException("Invalid email format");
         }
 
+        // Hash the PLAIN TEXT password before saving (produces 60+ char hash)
+        String hashedPassword = encoder.encode(user.getPasswordHash());
+        user.setPasswordHash(hashedPassword);
+
         //  If all validations pass, save user
-        return userRepository.save(user);
+        return usersRepository.save(user);
+    }
+
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
+        Optional<Users> userInfo = usersRepository.findActiveUserByUsername(username);
+
+        if (userInfo.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with email: " + username);
+        }
+
+        return new UserPrincipal(userInfo.get());
+    }
+
+
+    // ==================== USER OPERATIONS ====================
+
+    /**
+     * Get user by ID
+     *  Validates user exists, throws exception if not
+     */
+    public Users getUserById(Long userId) {
+        return usersRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+    }
+
+    /**
+     * Get user by email
+     *  Throws exception if not found
+     */
+    public Users getUserByEmailOrThrow(String email) {
+        return usersRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    /**
+     * Get user by username
+     *  Throws exception if not found
+     */
+    public Users getUserByUsernameOrThrow(String username) {
+        return usersRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
     }
 
     /**
@@ -115,7 +129,7 @@ public class UsersService {
 
         //  Validate new email doesn't conflict (if email changed)
         if (!user.getEmail().equals(userDetails.getEmail())) {
-            if (userRepository.existsByEmail(userDetails.getEmail())) {
+            if (usersRepository.existsByEmail(userDetails.getEmail())) {
                 throw new RuntimeException("Email already in use: " + userDetails.getEmail());
             }
         }
@@ -127,7 +141,7 @@ public class UsersService {
         user.setEmail(userDetails.getEmail());
 
         //  Save and return
-        return userRepository.save(user);
+        return usersRepository.save(user);
     }
 
     /**
@@ -136,7 +150,12 @@ public class UsersService {
      * (Critical for financial/compliance reasons)
      */
     public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
+        
+        Users user = getUserById(userId);
+        
+        user.setIsActive(true);
+        user.setIsDeleted(true);
+        usersRepository.save(user);
     }
 
     /**
@@ -146,7 +165,7 @@ public class UsersService {
     public void deactivateUser(Long userId) {
         Users user = getUserById(userId);
         user.setIsActive(false);
-        userRepository.save(user);
+        usersRepository.save(user);
     }
 
     /**
@@ -162,7 +181,7 @@ public class UsersService {
         }
         
         user.setIsActive(true);
-        userRepository.save(user);
+        usersRepository.save(user);
     }
 
     /**
@@ -170,7 +189,7 @@ public class UsersService {
      *  Useful for dashboard, reporting, authentication
      */
     public List<Users> getAllActiveUsers() {
-        return userRepository.findAllActiveUsers();
+        return usersRepository.findAllActiveUsers();
     }
 
     /**
@@ -178,6 +197,6 @@ public class UsersService {
      *  Useful for admin dashboard metrics
      */
     public long getActiveUserCount() {
-        return userRepository.countActiveUsers();
+        return usersRepository.countActiveUsers();
     }
 }

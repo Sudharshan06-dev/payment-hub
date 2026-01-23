@@ -54,19 +54,19 @@ public interface UsersRepository extends JpaRepository <Users, Long> {
     java.util.List<Users> findAllActiveUsers();
 
 
-    @Query("SELECT * FROM Users where User.email = :email AND is_active = True AND is_deleted = false")
+    @Query("SELECT u FROM Users u where u.email = :email AND u.isActive = True AND u.isDeleted = false")
     Optional<Users> findActiveUserByEmail(@Param("email") String email);
 
     /**
      * Find user by username with custom query
      */
-    @Query("SELECT u FROM User u WHERE u.username = :username AND u.isDeleted = false")
+    @Query("SELECT u FROM Users u WHERE u.username = :username AND u.isDeleted = false")
     Optional<Users> findActiveUserByUsername(@Param("username") String username);
 
     /**
      * Count total active users
      * Useful for admin dashboard
      */
-    @Query("SELECT COUNT(u) FROM User u WHERE u.isActive = true AND u.isDeleted = false")
+    @Query("SELECT COUNT(u) FROM Users u WHERE u.isActive = true AND u.isDeleted = false")
     long countActiveUsers();
 }

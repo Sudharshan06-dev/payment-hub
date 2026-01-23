@@ -89,20 +89,4 @@ public class Accounts {
     public enum AccountStatus {
         ACTIVE, INACTIVE, FROZEN, CLOSED
     }
-
-    // ==================== CONSTRUCTORS ====================
-    /**
-     * Constructor for user registration
-     * Used when creating a new user account
-     */
-    public Accounts(String accountNumber, AccountType accountType, BigDecimal balance, String currency, 
-               AccountStatus status) {
-        this.accountNumber = accountNumber;
-        this.accountType = accountType;
-        this.balance = balance;
-        this.currency = currency;
-        this.status = status;
-        this.isActive = true;
-        this.isDeleted = false;
-    }
 }
