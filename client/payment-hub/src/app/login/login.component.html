@@ -1,0 +1,241 @@
+<div class="login-container">
+  <!-- ==================== LEFT SECTION: BRANDING ==================== -->
+<div class="branding-section">
+  <div class="branding-content">
+    <div class="logo-container">
+      <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="logo-text">
+        <h1 class="logo-title">BillHub</h1>
+        <span class="logo-subtitle">Smart Finance</span>
+      </div>
+    </div>
+
+    <h2 class="branding-title">Enterprise Bill & Payment Management</h2>
+    <p class="branding-subtitle">
+      A secure, auditable, and scalable platform designed to support regulated financial environments,
+      improve payment visibility, and strengthen operational controls.
+    </p>
+
+    <div class="features-list">
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+        <div>
+          <h6>Security & Data Protection</h6>
+          <p>
+            End-to-end encryption, secure key management, and access controls aligned with PCI DSS
+            and industry best practices for protecting sensitive financial data.
+          </p>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-lightning-charge"></i></div>
+        <div>
+          <h6>Reliable Payment Processing</h6>
+          <p>
+            Designed for high availability and fault tolerance, supporting real-time processing
+            with monitoring, retries, and failure handling built in.
+          </p>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-graph-up"></i></div>
+        <div>
+          <h6>Audit-Ready Financial Analytics</h6>
+          <p>
+            Centralized reporting, traceability, and historical insights to support reconciliation,
+            compliance reviews, and informed financial decision-making.
+          </p>
+        </div>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon"><i class="bi bi-bell"></i></div>
+        <div>
+          <h6>Policy-Driven Notifications</h6>
+          <p>
+            Configurable alerts and reminders aligned with business rules, approval workflows,
+            and payment governance requirements.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="branding-footer">
+    <p>Designed with enterprise risk, compliance, and governance in mind</p>
+    <div class="trust-badges">
+      <span class="trust-badge">✓ PCI DSS Aligned</span>
+      <span class="trust-badge">✓ SOC 2 Principles</span>
+      <span class="trust-badge">✓ ISO 27001 Controls</span>
+    </div>
+  </div>
+</div>
+
+
+  <!-- ==================== RIGHT SECTION: LOGIN/REGISTER FORM ==================== -->
+  <div class="form-section">
+    <div class="form-wrapper">
+      <!-- HEADER -->
+      <div class="form-header">
+        <h2 class="form-title">
+          <span *ngIf="activeTab === 'login'">Sign In</span>
+          <span *ngIf="activeTab === 'register'">Create Account</span>
+        </h2>
+        <p class="form-subtitle">
+          <span *ngIf="activeTab === 'login'">Access your account</span>
+          <span *ngIf="activeTab === 'register'">Join us today</span>
+        </p>
+      </div>
+
+      <!-- TABS -->
+      <div class="tab-nav">
+        <button type="button" class="tab-link" [class.active]="activeTab === 'login'" (click)="switchTab('login')">Sign In</button>
+        <button type="button" class="tab-link" [class.active]="activeTab === 'register'" (click)="switchTab('register')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div *ngIf="activeTab === 'login'" class="form-content">
+        <div *ngIf="loginErrorMessage" class="alert alert-danger">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          {{ loginErrorMessage }}
+          <button type="button" class="btn-close" (click)="loginErrorMessage = ''"></button>
+        </div>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" formControlName="email" placeholder="your@email.com" [value]="getRememberedEmail()" autocomplete="email" required/>
+            <span *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-text">Invalid email</span>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-group">
+              <input [type]="showLoginPassword ? 'text' : 'password'" class="form-control" [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" formControlName="password" placeholder="••••••" autocomplete="current-password" required/>
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility('login')">
+                <i [class]="showLoginPassword ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill'"></i>
+              </button>
+            </div>
+            <span *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-text">Min 6 characters</span>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox">
+              <input type="checkbox" formControlName="rememberMe"/>
+              <span>Remember me</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="isLoginLoading || loginForm.invalid">
+            <span *ngIf="!isLoginLoading"><i class="bi bi-lock-fill"></i> Sign In</span>
+            <span *ngIf="isLoginLoading"><span class="spinner"></span> Signing in...</span>
+          </button>
+
+          <div class="divider">
+            <span>OR</span>
+          </div>
+
+          <div class="social-buttons">
+            <button type="button" class="btn-social" (click)="socialLogin()" [disabled]="isLoginLoading">
+              <i class="bi bi-google"></i> Google
+            </button>
+          </div>
+
+          <p class="form-footer">
+            Don't have an account? <a href="#" (click)="switchTab('register'); $event.preventDefault()">Sign up</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div *ngIf="activeTab === 'register'" class="form-content">
+        <div *ngIf="registerErrorMessage" class="alert alert-danger">
+          <i class="bi bi-exclamation-circle-fill"></i>
+          {{ registerErrorMessage }}
+          <button type="button" class="btn-close" (click)="registerErrorMessage = ''"></button>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" class="form-control" [class.is-invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" formControlName="firstName" placeholder="John" required/>
+              <span *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched" class="error-text">Required</span>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" class="form-control" [class.is-invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" formControlName="lastName" placeholder="Doe" required/>
+              <span *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched" class="error-text">Required</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" formControlName="username" placeholder="username" autocomplete="username" required/>
+            <span *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" class="error-text">3-20 characters</span>
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" formControlName="email" placeholder="your@email.com" autocomplete="email" required/>
+            <span *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="error-text">Invalid email</span>
+          </div>
+
+          <div class="form-group">
+            <label>Phone <span class="optional">(optional)</span></label>
+            <input type="tel" class="form-control" formControlName="phoneNumber" placeholder="+1 (555) 000-0000" autocomplete="tel"/>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="password-group">
+              <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control" [class.is-invalid]="registerForm.get('passwordHash')?.invalid && registerForm.get('passwordHash')?.touched" formControlName="passwordHash" placeholder="Min 8 characters" autocomplete="new-password" required/>
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility('register')">
+                <i [class]="showRegisterPassword ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill'"></i>
+              </button>
+            </div>
+            <small>8+ chars with uppercase, lowercase, number</small>
+            <span *ngIf="registerForm.get('passwordHash')?.invalid && registerForm.get('passwordHash')?.touched" class="error-text">Weak password</span>
+          </div>
+
+          <div class="form-group">
+            <label>Confirm Password</label>
+            <div class="password-group">
+              <input [type]="showRegisterPassword ? 'text' : 'password'" class="form-control" [class.is-invalid]="(registerForm.get('confirmPassword')?.invalid || (registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched)) && registerForm.get('confirmPassword')?.touched" formControlName="confirmPassword" placeholder="••••••" autocomplete="new-password" required/>
+              <button type="button" class="password-toggle" (click)="togglePasswordVisibility('register')">
+                <i [class]="showRegisterPassword ? 'bi bi-eye-fill' : 'bi bi-eye-slash-fill'"></i>
+              </button>
+            </div>
+            <span *ngIf="registerForm.errors?.['passwordMismatch'] && registerForm.get('confirmPassword')?.touched" class="error-text">Passwords don't match</span>
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" formControlName="agreeTerms" required/>
+            <span>I agree to <a href="#">Terms</a> & <a href="#">Privacy Policy</a></span>
+          </label>
+
+          <button type="submit" class="btn-primary" [disabled]="isRegisterLoading || registerForm.invalid">
+            <span *ngIf="!isRegisterLoading"><i class="bi bi-person-plus"></i> Create Account</span>
+            <span *ngIf="isRegisterLoading"><span class="spinner"></span> Creating...</span>
+          </button>
+
+          <p class="form-footer">
+            Already have account? <a href="#" (click)="switchTab('login'); $event.preventDefault()">Sign in</a>
+          </p>
+        </form>
+      </div>
+
+      <!-- SECURITY BADGE -->
+      <div class="security-info">
+        <i class="bi bi-shield-check"></i>
+        <span>Your data is protected by 256-bit SSL encryption</span>
+      </div>
+    </div>
+  </div>
+</div>
