@@ -1,0 +1,61 @@
+<div class="sidebar">
+  <!-- User Profile Section -->
+  <div class="sidebar-header">
+    <img [src]="userInfo.avatar" alt="User Avatar" class="user-avatar">
+    <div class="user-info">
+      <p class="user-name">{{ userInfo.name }}</p>
+      <p class="user-email">{{ userInfo.email }}</p>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Quick Stats Section -->
+  <div class="stats-section">
+    <p class="stats-title">Quick Stats</p>
+    <div class="stat-item">
+      <span class="material-icons stat-icon">receipt_long</span>
+      <div class="stat-content">
+        <p class="stat-label">Total Bills</p>
+        <p class="stat-value">{{ billStats?.total || 12 }}</p>
+      </div>
+    </div>
+    <div class="stat-item">
+      <span class="material-icons stat-icon">schedule</span>
+      <div class="stat-content">
+        <p class="stat-label">Due Soon</p>
+        <p class="stat-value">{{ billStats?.due || 3 }}</p>
+      </div>
+    </div>
+    <div class="stat-item">
+      <span class="material-icons stat-icon">error</span>
+      <div class="stat-content">
+        <p class="stat-label">Overdue</p>
+        <p class="stat-value">{{ billStats?.overdue || 1 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-menu">
+    <div *ngFor="let item of menuItems" class="menu-item" (click)="navigate(item.route)">
+      <span class="material-icons menu-icon">{{ item.icon }}</span>
+      <span class="menu-label">{{ item.label }}</span>
+    </div>
+  </nav>
+
+  <!-- Divider -->
+  <div class="sidebar-divider"></div>
+
+  <!-- Logout Section -->
+  <div class="sidebar-footer">
+    <button class="btn btn-logout" (click)="logout()">
+      <span class="material-icons">logout</span>
+      Logout
+    </button>
+  </div>
+</div>

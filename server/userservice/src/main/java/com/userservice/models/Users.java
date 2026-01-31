@@ -43,7 +43,7 @@ public class Users {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = true, length = 255)
     private String passwordHash; // Store bcrypt hash, NOT plain password
 
     @Column(nullable = true, length = 20)
@@ -54,6 +54,9 @@ public class Users {
 
     @Column(nullable = false, length = 50)
     private String lastName;
+
+    @Column(nullable = false, length = 100)
+    private String googleId;
 
     @Column(nullable = false)
     private String roles = "ROLE_USER";

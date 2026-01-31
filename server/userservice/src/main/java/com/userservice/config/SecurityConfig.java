@@ -26,30 +26,47 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    //Main security filter chain -> using the JWT filter to authenticate and authorize users
+    @Autowired
+    private CustomCorsConfig customCorsConfig;
 
-    /* 
+    @Autowired
+    private Oauth2HandlerConfig oauth2HandlerConfig;
+
+    // Main security filter chain -> using the JWT filter to authenticate and
+    // authorize users
+
+    /*
      * Main security configuration
      * Defines endpoint access rules and JWT filter setup
-     * Replaces the default security filter chain by the spring -> uses this custom filter chain for all the requests
+     * Replaces the default security filter chain by the spring -> uses this custom
+     * filter chain for all the requests
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-
-        return httpSecurity.
-        csrf(customizer -> customizer.disable())
-        .authorizeHttpRequests(request -> request
-            .requestMatchers("/api/v1/auth/**") //For register and login endpoint -> we should always consider to authorize since authentication/jwt token will not be provided
-            .permitAll()
-            .anyRequest().authenticated()) //requests other than this should only be allowed after authenticated
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Set custom authentication provider
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/oauth2/**",
+                                "/login/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
+                        .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oauth2HandlerConfig)
+                        .failureHandler((req, res, ex) -> {
+                            ex.printStackTrace();
+                            res.sendRedirect(
+                                    "http://localhost:4200/login?error=oauth_failed");
+                        }))
+                        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        .authenticationProvider(authenticationProvider())
+                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                        .cors(c -> c.configurationSource(customCorsConfig))
+                        .build();
     }
 
-    /* 
+    /*
      * Password encoder bean (uses BCrypt hashing)
      * Critical for secure password storage
      */
@@ -58,10 +75,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /* 
+    /*
      * Authentication provider configuration
      * Links UserDetailsService and PasswordEncoder
-     *  DaoAuthenticationProvider - This class is implements AuthenticationProvider interface for authenticating / authorizing the users from the database
+     * DaoAuthenticationProvider - This class is implements AuthenticationProvider
+     * interface for authenticating / authorizing the users from the database
      */
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -70,7 +88,7 @@ public class SecurityConfig {
         return provider;
     }
 
-    /* 
+    /*
      * Authentication manager bean
      * Required for programmatic authentication (e.g., in /generateToken)
      */
@@ -79,5 +97,4 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    
 }

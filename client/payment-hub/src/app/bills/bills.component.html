@@ -1,0 +1,232 @@
+<div class="bills-dashboard">
+  <!-- Header Section -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1 class="page-title">Manage Your Bills</h1>
+      <p class="page-subtitle">View, track, and pay all your bills in one place</p>
+    </div>
+    <button class="btn btn-refresh" (click)="refreshBills()">
+      <span class="material-icons">refresh</span>
+      Refresh
+    </button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-total">
+        <span class="material-icons">receipt_long</span>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Total Bills</p>
+        <p class="stat-value">{{ billStats?.total || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-pending">
+        <span class="material-icons">schedule</span>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Pending</p>
+        <p class="stat-value">{{ billStats?.pending || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-due">
+        <span class="material-icons">warning</span>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Due Soon</p>
+        <p class="stat-value">{{ billStats?.due || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon stat-icon-overdue">
+        <span class="material-icons">error</span>
+      </div>
+      <div class="stat-content">
+        <p class="stat-label">Overdue</p>
+        <p class="stat-value">{{ billStats?.overdue || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Search Section -->
+  <div class="controls-section">
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <span class="material-icons search-icon">search</span>
+      <input
+        type="text"
+        placeholder="Search by biller name, bill ID, or category..."
+        class="search-input"
+        (input)="onSearch($event.target)"
+      />
+    </div>
+
+    <!-- Filter & Sort Controls -->
+    <div class="filter-controls">
+      <!-- Status Filter -->
+      <div class="filter-group">
+        <label class="filter-label">Status:</label>
+        <div class="filter-buttons">
+          <button
+            *ngFor="let status of ['ALL', 'DUE', 'OVERDUE', 'PENDING', 'PAID']"
+            class="filter-btn"
+            [class.active]="statusFilter === status"
+            (click)="onStatusFilterChange(status)"
+          >
+            {{ status }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Sort Options -->
+      <div class="filter-group">
+        <label class="filter-label">Sort by:</label>
+        <select class="sort-select" (change)="onSortChange($event.target)">
+          <option value="dueDate">Due Date (Nearest First)</option>
+          <option value="amount">Amount (Highest First)</option>
+          <option value="billerName">Biller Name (A-Z)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bills Table -->
+  <div class="bills-container">
+
+    <!-- Empty State -->
+    <div *ngIf="paginatedBills.length === 0" class="empty-state">
+      <span class="material-icons empty-icon">inbox</span>
+      <h3>No bills found</h3>
+      <p>{{ searchQuery ? 'Try adjusting your search or filters' : 'You have no bills to display' }}</p>
+    </div>
+
+    <!-- Bills Table -->
+    <table *ngIf="paginatedBills.length > 0" class="bills-table">
+      <thead>
+        <tr>
+          <th class="col-biller">Biller</th>
+          <th class="col-category">Category</th>
+          <th class="col-amount">Amount</th>
+          <th class="col-due">Due Date</th>
+          <th class="col-status">Status</th>
+          <th class="col-action">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let bill of paginatedBills" class="bill-row" [class.overdue]="bill.status === 'OVERDUE'">
+          <!-- Biller Info -->
+          <td class="col-biller">
+            <div class="biller-info">
+              <div class="biller-logo">
+                <span *ngIf="!bill.billerLogo" class="material-icons">store</span>
+                <img *ngIf="bill.billerLogo" [src]="bill.billerLogo" [alt]="bill.billerName" />
+              </div>
+              <div class="biller-details">
+                <p class="biller-name">{{ bill.billerName }}</p>
+                <p class="bill-id">{{ bill.id }}</p>
+              </div>
+            </div>
+          </td>
+
+          <!-- Category -->
+          <td class="col-category">
+            <span class="category-badge">{{ bill.category || 'Other' }}</span>
+          </td>
+
+          <!-- Amount -->
+          <td class="col-amount">
+            <p class="amount-value">{{ formatCurrency(bill.amount) }}</p>
+            <p *ngIf="bill.recurring" class="recurring-badge">Recurring</p>
+          </td>
+
+          <!-- Due Date & Days -->
+          <td class="col-due">
+            <p class="due-date">{{ bill.dueDate | date: 'MMM dd, yyyy' }}</p>
+            <p class="days-until" [class.overdue]="getDaysUntilDue(bill.dueDate) < 0">
+              {{ getDaysUntilDueText(bill.dueDate) }}
+            </p>
+          </td>
+
+          <!-- Status Badge -->
+          <td class="col-status">
+            <span 
+              class="status-badge"
+              [ngClass]="statusBadgeClass[bill.status]"
+            >
+              <span class="material-icons status-icon">{{ statusBadgeIcon[bill.status] }}</span>
+              {{ bill.status }}
+            </span>
+          </td>
+
+          <!-- Action Button -->
+          <td class="col-action">
+            <button
+              *ngIf="bill.status !== 'PAID'"
+              class="btn btn-pay"
+              (click)="openPaymentModal(bill)"
+            >
+              <span class="material-icons">payment</span>
+              Pay
+            </button>
+            <span *ngIf="bill.status === 'PAID'" class="paid-label">
+              <span class="material-icons">check_circle</span>
+              Paid
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="getTotalPages() > 1" class="pagination-section">
+    <p class="pagination-info">
+      Showing {{ currentPage * pageSize + 1 }}-{{ (currentPage + 1) * pageSize > filteredBills.length ? filteredBills.length : (currentPage + 1) * pageSize }} of {{ filteredBills.length }} bills
+    </p>
+
+    <div class="pagination-controls">
+      <button
+        class="btn btn-sm btn-secondary"
+        (click)="onPageChange(currentPage - 1)"
+        [disabled]="currentPage === 0"
+      >
+        <span class="material-icons">chevron_left</span>
+        Previous
+      </button>
+
+      <div class="page-numbers">
+        <button
+          *ngFor="let page of getPaginationArray()"
+          class="page-btn"
+          [class.active]="page === currentPage"
+          (click)="onPageChange(page)"
+        >
+          {{ page + 1 }}
+        </button>
+      </div>
+
+      <button
+        class="btn btn-sm btn-secondary"
+        (click)="onPageChange(currentPage + 1)"
+        [disabled]="currentPage >= getTotalPages() - 1"
+      >
+        Next
+        <span class="material-icons">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <app-payment
+    *ngIf="showPaymentModal && selectedBill"
+    [bill]="selectedBill"
+    (onClose)="closePaymentModal()"
+    (onSuccess)="onPaymentSuccess($event)"
+  ></app-payment>
+</div>

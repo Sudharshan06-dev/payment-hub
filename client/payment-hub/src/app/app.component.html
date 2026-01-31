@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/html">
-
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{title}}</title>
-    </head>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 
-    <body>
 
-        <ngx-spinner
-                bdColor="rgba(0, 0, 0, 0.5)"
-                [template]="spinnerTemplate">
-        </ngx-spinner>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+</head>
 
-        <div class="layout">
-            <div class="body">
-                <router-outlet></router-outlet>
-            </div>
+
+<body>
+
+    <ngx-spinner bdColor="rgba(0, 0, 0, 0.5)" [template]="spinnerTemplate">
+    </ngx-spinner>
+
+    <div class="layout">
+        <div class="body">
+            <router-outlet></router-outlet>
         </div>
-    </body>
+    </div>
+</body>
+
 </html>

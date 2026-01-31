@@ -109,9 +109,9 @@
 
         <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" class="form-control" [class.is-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" formControlName="email" placeholder="your@email.com" [value]="getRememberedEmail()" autocomplete="email" required/>
-            <span *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-text">Invalid email</span>
+            <label>Username</label>
+            <input type="username" class="form-control" [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" formControlName="username" placeholder="username" required/>
+            <span *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error-text">Invalid username</span>
           </div>
 
           <div class="form-group">
@@ -125,16 +125,8 @@
             <span *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-text">Min 6 characters</span>
           </div>
 
-          <div class="form-options">
-            <label class="checkbox">
-              <input type="checkbox" formControlName="rememberMe"/>
-              <span>Remember me</span>
-            </label>
-          </div>
-
-          <button type="submit" class="btn-primary" [disabled]="isLoginLoading || loginForm.invalid">
-            <span *ngIf="!isLoginLoading"><i class="bi bi-lock-fill"></i> Sign In</span>
-            <span *ngIf="isLoginLoading"><span class="spinner"></span> Signing in...</span>
+          <button type="submit" class="btn-primary" [disabled]="loginForm.invalid">
+            Sign In
           </button>
 
           <div class="divider">
@@ -142,7 +134,7 @@
           </div>
 
           <div class="social-buttons">
-            <button type="button" class="btn-social" (click)="socialLogin()" [disabled]="isLoginLoading">
+            <button type="button" class="btn-social" (click)="redirectToGoogleAuth()" [disabled]="isLoginLoading">
               <i class="bi bi-google"></i> Google
             </button>
           </div>

@@ -1,0 +1,1900 @@
+/* Bills Dashboard Container */
+.bills-dashboard {
+  padding: 32px;
+  background: transparent;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #212529;
+}
+
+/* Header Section */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-content {
+  flex: 1;
+  min-width: 300px;
+}
+
+.header-content .page-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #212529;
+}
+
+.header-content .page-subtitle {
+  font-size: 15px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.btn-refresh {
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #d4292f;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #d4292f;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-refresh .material-icons {
+  font-size: 20px;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 28px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.stat-icon.stat-icon-total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.stat-icon-pending {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-icon.stat-icon-due {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.stat-icon.stat-icon-overdue {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 6px 0 0 0;
+  color: #212529;
+}
+
+/* Alert */
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.alert .material-icons {
+  flex-shrink: 0;
+  font-size: 22px;
+}
+
+.alert.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Controls Section */
+.controls-section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.search-bar {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+  font-size: 20px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+  background: white;
+  color: #212529;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #d4292f;
+  box-shadow: 0 0 0 3px rgba(212, 41, 47, 0.1);
+}
+
+.search-input::placeholder {
+  color: #6c757d;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-weight: 700;
+  color: #212529;
+  white-space: nowrap;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 14px;
+  border: 1px solid #e9ecef;
+  background: white;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #212529;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.filter-btn:hover {
+  border-color: #d4292f;
+  color: #d4292f;
+  background: rgba(212, 41, 47, 0.05);
+}
+
+.filter-btn.active {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+.sort-select {
+  padding: 8px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #212529;
+  font-weight: 500;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #d4292f;
+  box-shadow: 0 0 0 3px rgba(212, 41, 47, 0.1);
+}
+
+/* Bills Container */
+.bills-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+  min-height: 400px;
+  position: relative;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  color: #6c757d;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top-color: #d4292f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 64px;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.empty-state p {
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Bills Table */
+.bills-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bills-table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.bills-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 12px;
+  color: #212529;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bills-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.bills-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.bills-table tbody tr.overdue {
+  background: rgba(220, 53, 69, 0.03);
+}
+
+.bills-table td {
+  padding: 16px;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+/* Table Columns */
+.col-biller {
+  width: 28%;
+}
+
+.biller-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.biller-logo {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.biller-logo .material-icons {
+  color: #6c757d;
+  font-size: 24px;
+}
+
+.biller-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.biller-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.biller-name {
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.bill-id {
+  font-size: 11px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+  font-family: 'Courier New', monospace;
+}
+
+.col-category {
+  width: 14%;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #212529;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.col-amount {
+  width: 14%;
+}
+
+.amount-value {
+  font-weight: 700;
+  font-size: 15px;
+  color: #212529;
+  margin: 0;
+}
+
+.recurring-badge {
+  margin: 4px 0 0 0;
+  font-size: 10px;
+  color: #17a2b8;
+  font-weight: 700;
+}
+
+.col-due {
+  width: 16%;
+}
+
+.due-date {
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+  font-size: 13px;
+}
+
+.days-until {
+  font-size: 11px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+  font-weight: 500;
+}
+
+.days-until.overdue {
+  color: #dc3545;
+  font-weight: 700;
+}
+
+.col-status {
+  width: 14%;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.badge-success {
+  background: rgba(40, 167, 69, 0.12);
+  color: #28a745;
+}
+
+.badge-warning {
+  background: rgba(255, 193, 7, 0.12);
+  color: #ff9800;
+}
+
+.badge-danger {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+}
+
+.badge-info {
+  background: rgba(23, 162, 184, 0.12);
+  color: #17a2b8;
+}
+
+.col-action {
+  width: 14%;
+  text-align: center;
+}
+
+.btn-pay {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #d4292f;
+  color: white;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.btn-pay .material-icons {
+  font-size: 16px;
+}
+
+.btn-pay:hover {
+  background: #a82030;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.btn-pay:active {
+  transform: translateY(0);
+}
+
+.paid-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(40, 167, 69, 0.12);
+  color: #28a745;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.paid-label .material-icons {
+  font-size: 16px;
+}
+
+/* Pagination Section */
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #212529;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn .material-icons {
+  font-size: 18px;
+}
+
+.btn.btn-sm {
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.btn.btn-secondary {
+  background: #f8f9fa;
+  color: #212529;
+  border: 1px solid #e9ecef;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #212529;
+  background: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.page-btn:hover {
+  border-color: #d4292f;
+  color: #d4292f;
+  background: rgba(212, 41, 47, 0.05);
+}
+
+.page-btn.active {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .bills-dashboard {
+    padding: 24px;
+  }
+
+  .stat-card {
+    padding: 20px;
+  }
+
+  .controls-section {
+    padding: 20px;
+  }
+
+  .filter-controls {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 992px) {
+  .bills-dashboard {
+    padding: 20px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 24px;
+  }
+
+  .header-content .page-title {
+    font-size: 28px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .col-biller {
+    width: 35%;
+  }
+
+  .col-category {
+    width: 18%;
+  }
+
+  .col-amount {
+    width: 15%;
+  }
+
+  .col-due {
+    width: 18%;
+  }
+
+  .col-status {
+    width: 14%;
+  }
+}
+
+@media (max-width: 768px) {
+  .bills-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .header-content {
+    min-width: auto;
+  }
+
+  .header-content .page-title {
+    font-size: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .controls-section {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .search-bar {
+    margin-bottom: 16px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .filter-group {
+    gap: 8px;
+  }
+
+  .filter-buttons {
+    gap: 6px;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .bills-table {
+    font-size: 12px;
+  }
+
+  .bills-table th,
+  .bills-table td {
+    padding: 12px 8px;
+  }
+
+  .col-biller {
+    width: 40%;
+  }
+
+  .col-category {
+    width: 15%;
+    display: none;
+  }
+
+  .col-amount {
+    width: 15%;
+  }
+
+  .col-due {
+    width: 15%;
+  }
+
+  .col-status {
+    width: 15%;
+  }
+
+  .col-action {
+    width: 15%;
+  }
+
+  .biller-info {
+    gap: 10px;
+  }
+
+  .biller-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .biller-name {
+    font-size: 12px;
+  }
+
+  .bill-id {
+    font-size: 10px;
+  }
+
+  .amount-value {
+    font-size: 14px;
+  }
+
+  .btn-pay {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .pagination-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .pagination-controls {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bills-dashboard {
+    padding: 12px;
+  }
+
+  .dashboard-header {
+    gap: 10px;
+  }
+
+  .header-content .page-title {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .header-content .page-subtitle {
+    font-size: 12px;
+  }
+
+  .btn-refresh {
+    padding: 8px 12px;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .stat-label {
+    font-size: 9px;
+  }
+
+  .controls-section {
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .search-input {
+    padding: 10px 12px 10px 36px;
+    font-size: 13px;
+  }
+
+  .filter-controls {
+    gap: 10px;
+  }
+
+  .filter-btn {
+    padding: 4px 10px;
+    font-size: 10px;
+  }
+
+  .sort-select {
+    padding: 6px 10px;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .bills-table th,
+  .bills-table td {
+    padding: 10px 6px;
+    font-size: 11px;
+  }
+
+  .col-due {
+    display: none;
+  }
+
+  .col-status {
+    display: none;
+  }
+
+  .col-biller {
+    width: 50%;
+  }
+
+  .col-amount {
+    width: 25%;
+  }
+
+  .col-action {
+    width: 25%;
+  }
+
+  .biller-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .biller-name {
+    font-size: 11px;
+  }
+
+  .bill-id {
+    font-size: 9px;
+  }
+
+  .btn-pay {
+    padding: 5px 8px;
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .btn-pay .material-icons {
+    font-size: 14px;
+  }
+
+  .page-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+
+  .btn.btn-sm {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+}
+
+/* Header Section */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-content .page-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #212529;
+}
+
+.header-content .page-subtitle {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.btn-refresh {
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #d4292f;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #d4292f;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-refresh .material-icons {
+  font-size: 20px;
+}
+
+/* Statistics Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.stat-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 28px;
+  color: white;
+}
+
+.stat-icon.stat-icon-total {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-icon.stat-icon-pending {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.stat-icon.stat-icon-due {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.stat-icon.stat-icon-overdue {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+}
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 4px 0 0 0;
+  color: #212529;
+}
+
+/* Alert */
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.alert .material-icons {
+  flex-shrink: 0;
+  font-size: 22px;
+}
+
+.alert.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Controls Section */
+.controls-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 32px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 16px 12px 44px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  transition: all 0.3s ease;
+  background: white;
+  color: #212529;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #d4292f;
+  box-shadow: 0 0 0 3px rgba(212, 41, 47, 0.1);
+}
+
+.search-input::placeholder {
+  color: #6c757d;
+}
+
+.filter-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #212529;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 6px 12px;
+  border: 1px solid #e9ecef;
+  background: white;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #212529;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  border: none;
+}
+
+.filter-btn:hover {
+  border-color: #d4292f;
+  color: #d4292f;
+  background: rgba(212, 41, 47, 0.05);
+}
+
+.filter-btn.active {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+.sort-select {
+  padding: 6px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.sort-select:focus {
+  outline: none;
+  border-color: #d4292f;
+  box-shadow: 0 0 0 3px rgba(212, 41, 47, 0.1);
+}
+
+/* Bills Container */
+.bills-container {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+  min-height: 400px;
+  position: relative;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  color: #6c757d;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e9ecef;
+  border-top-color: #d4292f;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 400px;
+  color: #6c757d;
+}
+
+.empty-icon {
+  font-size: 64px;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.empty-state p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Bills Table */
+.bills-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bills-table thead {
+  background: #f8f9fa;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.bills-table th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #212529;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bills-table tbody tr {
+  border-bottom: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.bills-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.bills-table tbody tr.overdue {
+  background: rgba(220, 53, 69, 0.05);
+}
+
+.bills-table td {
+  padding: 16px;
+  font-size: 14px;
+}
+
+/* Table Columns */
+.col-biller {
+  width: 30%;
+}
+
+.biller-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.biller-logo {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.biller-logo .material-icons {
+  color: #6c757d;
+}
+
+.biller-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.biller-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.biller-name {
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bill-id {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+  font-family: 'Courier New', monospace;
+}
+
+.col-category {
+  width: 15%;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.col-amount {
+  width: 15%;
+}
+
+.amount-value {
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+  margin: 0;
+}
+
+.recurring-badge {
+  margin: 4px 0 0 0;
+  font-size: 11px;
+  color: #17a2b8;
+  font-weight: 600;
+}
+
+.col-due {
+  width: 15%;
+}
+
+.due-date {
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.days-until {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 4px 0 0 0;
+}
+
+.days-until.overdue {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.col-status {
+  width: 15%;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-icon {
+  font-size: 16px;
+}
+
+.badge-success {
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+}
+
+.badge-warning {
+  background: rgba(255, 193, 7, 0.1);
+  color: #ff9800;
+}
+
+.badge-danger {
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
+.badge-info {
+  background: rgba(23, 162, 184, 0.1);
+  color: #17a2b8;
+}
+
+.col-action {
+  width: 10%;
+  text-align: center;
+}
+
+.btn-pay {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #d4292f;
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-pay .material-icons {
+  font-size: 18px;
+}
+
+.btn-pay:hover {
+  background: #a82030;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.btn-pay:active {
+  transform: translateY(0);
+}
+
+.paid-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(40, 167, 69, 0.1);
+  color: #28a745;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.paid-label .material-icons {
+  font-size: 18px;
+}
+
+/* Pagination Section */
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #6c757d;
+  margin: 0;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #212529;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn .material-icons {
+  font-size: 18px;
+}
+
+.btn.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn.btn-secondary {
+  background: #f8f9fa;
+  color: #212529;
+  border: 1px solid #e9ecef;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 4px;
+}
+
+.page-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #212529;
+  background: white;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  border: none;
+}
+
+.page-btn:hover {
+  border-color: #d4292f;
+  color: #d4292f;
+}
+
+.page-btn.active {
+  background: #d4292f;
+  color: white;
+  border-color: #d4292f;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .bills-dashboard {
+    padding: 24px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-content .page-title {
+    font-size: 24px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 22px;
+  }
+
+  .filter-controls {
+    gap: 12px;
+  }
+
+  .col-biller {
+    width: 35%;
+  }
+
+  .col-category {
+    width: 20%;
+  }
+
+  .col-amount {
+    width: 20%;
+  }
+
+  .col-due {
+    width: 20%;
+  }
+
+  .col-status {
+    width: 25%;
+  }
+
+  .col-action {
+    width: 15%;
+  }
+
+  .pagination-section {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .bills-dashboard {
+    padding: 16px;
+  }
+
+  .dashboard-header {
+    gap: 8px;
+  }
+
+  .header-content .page-title {
+    font-size: 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .stat-value {
+    font-size: 18px;
+  }
+
+  .controls-section {
+    padding: 16px;
+  }
+
+  .search-input {
+    padding: 10px 12px 10px 36px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .filter-group {
+    gap: 8px;
+  }
+
+  .filter-buttons {
+    gap: 4px;
+  }
+
+  .filter-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .bills-table {
+    font-size: 12px;
+  }
+
+  .bills-table th,
+  .bills-table td {
+    padding: 12px 8px;
+  }
+
+  .biller-info {
+    gap: 8px;
+  }
+
+  .biller-logo {
+    width: 40px;
+    height: 40px;
+  }
+
+  .biller-name {
+    font-size: 12px;
+  }
+
+  .bill-id {
+    font-size: 10px;
+  }
+
+  .amount-value {
+    font-size: 14px;
+  }
+
+  .btn-pay {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .btn-pay .material-icons {
+    font-size: 16px;
+  }
+
+  .pagination-info {
+    font-size: 12px;
+  }
+
+  .page-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}

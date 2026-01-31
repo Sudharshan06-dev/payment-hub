@@ -2,9 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { AuthService } from '../auth.service';
 import { RequestService } from '../../services/request.service';
 import { LocalStorageHelper } from '../../services/local-storage.service';
 import { ToasterHelper } from '../../services/toast.service';
@@ -19,7 +16,7 @@ import { SKIP_AUTH_TRUE } from '../../interceptors/auth.interceptor';
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule]
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent implements OnInit {
 
   loginForm: FormGroup;
   registerForm: FormGroup;
@@ -34,13 +31,11 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   loginErrorMessage = '';
   registerErrorMessage = '';
-  private destroy$ = new Subject<void>();
 
   // ==================== CONSTRUCTOR ====================
 
   constructor(
     private formBuilder: FormBuilder,
-    private authService: AuthService,
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
@@ -61,34 +56,30 @@ export class LoginComponent implements OnInit, OnDestroy {
 
         const decoded: any = jwtDecode(params['token']);
         const userDetails = {
-          email: decoded.sub,
-          user_id: decoded.user_id,
-          firstname: decoded.firstname,
-          lastname: decoded.lastname
+          username: decoded.sub,
         };
         this.localStorage.storeItem('access_token', params['token'])
         this.localStorage.storeItem('user_details', userDetails)
         this.router.navigate(['/dashboard']);
       }
+
+      else if(params["error"]) {
+        const message : string = params["error"];
+        this.toastService.error({"title": "Error", "message": message})
+      }
     });
-
-    this.loadRememberedEmail();
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 
 
   private createLoginForm(): FormGroup {
     return this.formBuilder.group({
-      email: [
+       username: [
         '',
         [
           Validators.required,
-          Validators.email,
-          Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+          Validators.minLength(3),
+          Validators.maxLength(20),
+          Validators.pattern(/^[a-zA-Z0-9_-]*$/)
         ]
       ],
       password: [
@@ -98,7 +89,6 @@ export class LoginComponent implements OnInit, OnDestroy {
           Validators.minLength(6)
         ]
       ],
-      rememberMe: [false]
     });
   }
 
@@ -190,8 +180,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.isLoginLoading = true;
     this.loginErrorMessage = '';
 
-    const { email, password, rememberMe } = this.loginForm.value;
-
     this.request.post(AUTH_PATH + '/login', this.loginForm.getRawValue(), [SKIP_AUTH_TRUE]).subscribe({
       next: (data: any) => {
 
@@ -199,9 +187,6 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.localStorage.storeItem('access_token', data?.access_token)
         this.localStorage.storeItem('user_details', data?.user_details)
 
-        if (rememberMe) {
-          this.saveRememberedEmail(email);
-        }
         setTimeout(() => {
           this.router.navigate(['/dashboard']);
         }, 1000);
@@ -237,7 +222,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       next: (data: any) => {
 
         this.toastService.success(data);
-        this.loginForm.patchValue({ email: formData.email });
+        this.loginForm.patchValue({ username: formData.username });
         this.registerForm.reset();
 
         setTimeout(() => {
@@ -259,54 +244,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 
-
-  private saveRememberedEmail(email: string): void {
-    try {
-      localStorage.setItem('billhub_remembered_email', email);
-    } catch (error) {
-      this.toastService.warning(`Could not save email to localStorage:, ${error}`);
-    }
-  }
-
-  private loadRememberedEmail(): void {
-    try {
-      const savedEmail = localStorage.getItem('billhub_remembered_email');
-      if (savedEmail) {
-        this.loginForm.patchValue({
-          email: savedEmail,
-          rememberMe: true
-        });
-      }
-    } catch (error) {
-      this.toastService.warning(`Could not load email to localStorage:, ${error}`);
-    }
-  }
-
-  getRememberedEmail(): string {
-    try {
-      return localStorage.getItem('billhub_remembered_email') || '';
-    } catch (error) {
-      return '';
-    }
-  }
-
   public redirectToGoogleAuth() {
-    window.location.href = AUTH_PATH + '/google/login';
-  }
-
-  // ==================== SOCIAL LOGIN ====================
-  socialLogin(): void {
-    this.isLoginLoading = true;
-    this.loginErrorMessage = '';
-
-    // TODO: Implement actual OAuth flow with backend
-    console.log('Social login initiated with:', 'google');
-
-    // Mock implementation
-    setTimeout(() => {
-      this.isLoginLoading = false;
-      this.loginErrorMessage = `Google login is not yet configured.`;
-    }, 1000);
+    window.location.href = 'http://localhost:8081/oauth2/authorization/google';
   }
 
   // ==================== TAB NAVIGATION ====================

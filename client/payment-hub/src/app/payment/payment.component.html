@@ -1,0 +1,267 @@
+<div class="payment-modal-overlay" (click)="closeModal()">
+  <div class="payment-modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">Payment Details</h2>
+      <button class="btn-close" (click)="closeModal()" [disabled]="isProcessing">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      <div class="progress-step" [class.active]="paymentStep === 'review'" [class.completed]="paymentStep !== 'review'">
+        <span class="step-number">1</span>
+        <span class="step-label">Review</span>
+      </div>
+      <div class="progress-line" [class.completed]="paymentStep !== 'review'"></div>
+      <div class="progress-step" [class.active]="paymentStep === 'payment'" [class.completed]="paymentStep === 'confirm'">
+        <span class="step-number">2</span>
+        <span class="step-label">Payment</span>
+      </div>
+      <div class="progress-line" [class.completed]="paymentStep === 'confirm'"></div>
+      <div class="progress-step" [class.active]="paymentStep === 'confirm'">
+        <span class="step-number">3</span>
+        <span class="step-label">Confirm</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="modal-content">
+      <!-- Review Step -->
+      <div *ngIf="paymentStep === 'review'" class="step-container">
+        <h3 class="step-title">Review Bill Details</h3>
+
+        <div class="bill-review">
+          <!-- Bill Info -->
+          <div class="review-section">
+            <h4 class="section-title">Bill Information</h4>
+            <div class="review-item">
+              <span class="label">Biller</span>
+              <span class="value">{{ bill?.billerName }}</span>
+            </div>
+            <div class="review-item">
+              <span class="label">Bill ID</span>
+              <span class="value monospace">{{ bill?.id }}</span>
+            </div>
+            <div class="review-item">
+              <span class="label">Category</span>
+              <span class="value">{{ bill?.category || 'Other' }}</span>
+            </div>
+            <div class="review-item">
+              <span class="label">Due Date</span>
+              <span class="value">{{ bill?.dueDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Amount Info -->
+          <div class="review-section">
+            <h4 class="section-title">Payment Amount</h4>
+            <div class="amount-box">
+              <p class="amount-label">Amount Due</p>
+              <p class="amount-value">{{ formatCurrency(bill?.amount) }}</p>
+            </div>
+
+            <p class="important-notice">
+              <span class="material-icons">info</span>
+              Payment will be processed immediately and settled within 24 hours.
+            </p>
+          </div>
+
+          <!-- Agreement -->
+          <div class="review-section">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                formControlName="agreeTerms"
+                class="checkbox-input"
+              />
+              <span class="checkbox-text">
+                I agree to pay
+                <strong>{{ formatCurrency(bill?.amount) }}</strong>
+                to
+                <strong>{{ bill?.billerName }}</strong>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="error" class="alert alert-danger">
+          <span class="material-icons">error</span>
+          <span>{{ error }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button
+            class="btn btn-primary"
+            (click)="proceedToPayment()"
+            [disabled]="!paymentForm.get('agreeTerms')?.value || isProcessing"
+          >
+            Continue to Payment
+            <span class="material-icons">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Step -->
+      <div *ngIf="paymentStep === 'payment'" class="step-container">
+        <h3 class="step-title">Enter Payment Method</h3>
+
+        <form [formGroup]="paymentForm" class="payment-form">
+          <!-- Cardholder Name -->
+          <div class="form-group">
+            <label class="form-label">Cardholder Name</label>
+            <input
+              type="text"
+              formControlName="cardholderName"
+              class="form-input"
+              placeholder="John Doe"
+              [disabled]="isProcessing"
+            />
+            <span
+              *ngIf="
+                paymentForm.get('cardholderName')?.invalid &&
+                paymentForm.get('cardholderName')?.touched
+              "
+              class="error-text"
+            >
+              Please enter a valid name
+            </span>
+          </div>
+
+          <!-- Card Number -->
+          <div class="form-group">
+            <label class="form-label">Card Number</label>
+            <div class="card-input-wrapper">
+              <input
+                type="text"
+                formControlName="cardNumber"
+                (input)="onCardNumberChange($event)"
+                class="form-input card-input"
+                placeholder="1234 5678 9012 3456"
+                [disabled]="isProcessing"
+                maxlength="23"
+              />
+              <span class="material-icons card-icon">{{ cardTypeIcon }}</span>
+            </div>
+            <span
+              *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched"
+              class="error-text"
+            >
+              Please enter a valid card number
+            </span>
+          </div>
+
+          <!-- Expiry & CVV Row -->
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Expiry Date</label>
+              <input
+                type="text"
+                formControlName="expiry"
+                (input)="onExpiryChange($event)"
+                class="form-input"
+                placeholder="MM/YY"
+                [disabled]="isProcessing"
+                maxlength="5"
+              />
+              <span
+                *ngIf="paymentForm.get('expiry')?.invalid && paymentForm.get('expiry')?.touched"
+                class="error-text"
+              >
+                Format: MM/YY
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input
+                type="text"
+                formControlName="cvv"
+                (input)="onCVVChange($event)"
+                class="form-input"
+                placeholder="123"
+                [disabled]="isProcessing"
+                inputmode="numeric"
+                maxlength="4"
+              />
+              <span
+                *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched"
+                class="error-text"
+              >
+                3-4 digits
+              </span>
+            </div>
+          </div>
+
+          <!-- Security Notice -->
+          <p class="security-notice">
+            <span class="material-icons">lock</span>
+            Your payment information is encrypted and secure
+          </p>
+        </form>
+
+        <!-- Error -->
+        <div *ngIf="error" class="alert alert-danger">
+          <span class="material-icons">error</span>
+          <span>{{ error }}</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="goBack()" [disabled]="isProcessing">
+            <span class="material-icons">arrow_back</span>
+            Back
+          </button>
+          <button
+            class="btn btn-primary"
+            (click)="submitPayment()"
+            [disabled]="paymentForm.invalid || isProcessing"
+          >
+            <span *ngIf="isProcessing" class="spinner-small"></span>
+            {{ isProcessing ? 'Processing...' : 'Pay ' + formatCurrency(bill?.amount) }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmation Step -->
+      <div *ngIf="paymentStep === 'confirm'" class="step-container">
+        <div class="confirmation-success">
+          <div class="success-icon">
+            <span class="material-icons">check_circle</span>
+          </div>
+
+          <h3 class="confirmation-title">Payment Successful!</h3>
+
+          <p class="confirmation-message">
+            Your payment of
+            <strong>{{ formatCurrency(bill?.amount) }}</strong>
+            to
+            <strong>{{ bill?.billerName }}</strong>
+            has been initiated.
+          </p>
+
+          <div class="confirmation-details">
+            <p>
+              <span class="material-icons">info</span>
+              Your payment will be settled and reflected in your account within 24 hours.
+            </p>
+            <p>
+              <span class="material-icons">mail</span>
+              A confirmation email has been sent to your registered email address.
+            </p>
+          </div>
+
+          <div class="modal-actions">
+            <button class="btn btn-primary" (click)="closeModal()">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

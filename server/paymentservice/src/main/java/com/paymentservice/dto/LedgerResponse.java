@@ -1,27 +1,27 @@
 package com.paymentservice.dto;
 
 public class LedgerResponse {
-    private boolean success;
+    private String title;
     private String message;
     private Object data;
     
     //Returns collection instances so we need object for the data
-    private LedgerResponse(boolean success, String message, Object data) {
-        this.success = success;
+    private LedgerResponse(String title, String message, Object data) {
+        this.title = title;
         this.message = message;
         this.data = data;
     }
     
     public static LedgerResponse success(String message, Object data) {
-        return new LedgerResponse(true, message, data);
+        return new LedgerResponse("Sucess", message, data);
     }
     
     public static LedgerResponse error(String message) {
-        return new LedgerResponse(false, message, null);
+        return new LedgerResponse("Error", message, null);
     }
     
     // Getters
-    public boolean isSuccess() { return success; }
+    public String getTitle() { return title; }
     public String getMessage() { return message; }
     public Object getData() { return data; }
 }

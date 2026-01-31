@@ -1,5 +1,9 @@
 package com.userservice.controllers;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +22,11 @@ import com.userservice.models.Users;
 import com.userservice.services.OauthService;
 import com.userservice.services.UsersService;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @RestController
 @RequestMapping("/api/v1/auth")
+
 
 public class LoginController {
 
@@ -38,6 +45,10 @@ public class LoginController {
         return "Hellooo Spring Boot Makkale";
     }
 
+    @GetMapping("/google/login")
+    public void googleLogin(HttpServletResponse response) throws IOException {
+        response.sendRedirect("/oauth2/authorization/google");
+    }
 
     /**
      * POST /api/v1/register
@@ -61,19 +72,20 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<?> loginByUsername(@RequestBody AuthRequest authRequest) {
         try {
-
-            String bearerToken = null;
+            Map<String, Object> userData = new HashMap<>();
             
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
             if (authentication.isAuthenticated()) {
-                bearerToken = oauthService.generateToken(authRequest.getUsername());
+                String bearerToken = oauthService.generateToken(authRequest.getUsername());
+                userData.put("access_token", bearerToken);
+                userData.put("user_details", usersService.getUserByUsernameOrThrow(authRequest.getUsername()));
             }
             else {
                 throw new UsernameNotFoundException("Invalid user request!");
             }
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(bearerToken);
+            return ResponseEntity.status(HttpStatus.CREATED).body(userData);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
