@@ -1,6 +1,4 @@
 package com.userservice.services;
-
-import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -49,13 +47,18 @@ public class OauthService {
         return keyPair.getPublic();
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String email, Long userId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("username", username);
+        claims.put("email", email);
+        claims.put("userId", userId);
+
+        String subject = username + "|" + email + "|" + userId;
 
         return Jwts
                 .builder()
                 .setClaims(claims)
-                .subject(username)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * (60 * 60 * 24)))
                 .signWith(privateKey)
@@ -64,6 +67,14 @@ public class OauthService {
 
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, claims -> claims.get("email", String.class));
+    }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
     }
 
     private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {

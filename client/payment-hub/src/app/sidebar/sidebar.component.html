@@ -1,10 +1,10 @@
 <div class="sidebar">
   <!-- User Profile Section -->
   <div class="sidebar-header">
-    <img [src]="userInfo.avatar" alt="User Avatar" class="user-avatar">
+    <img [src]="userInfo?.avatar" alt="User Avatar" class="user-avatar">
     <div class="user-info">
-      <p class="user-name">{{ userInfo.name }}</p>
-      <p class="user-email">{{ userInfo.email }}</p>
+      <p class="user-name">{{ userInfo?.name }}</p>
+      <p class="user-email">{{ userInfo?.email }}</p>
     </div>
   </div>
 

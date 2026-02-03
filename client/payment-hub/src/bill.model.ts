@@ -11,18 +11,21 @@ export enum BillStatus {
 }
 
 export interface Bill {
-  id: number;
-  billerId: string;
-  billerName: string;
-  billerLogo?: string;
-  amount: number | null;
-  dueDate: Date;
-  createdDate: Date;
-  paidDate?: Date;
-  status: BillStatus;
+  bill_id: number;
+  user_id: number;
+  biller_name: string;
+  account_number: string;
+  amount: number;
+  currency: string;
+  due_date: string | Date;
+  bill_status: BillStatus;
+  bill_frequency: 'MONTHLY' | 'QUARTERLY' | 'ANNUALLY' | 'ONE_TIME';
+  created_at: string | Date;
+  updated_at: string | Date;
+  biller_logo?: string;
   description?: string;
   category?: 'Utilities' | 'Insurance' | 'Subscription' | 'Medical' | 'Other';
-  recurring: boolean;
+  paid_date?: string | Date;
   paymentHistory?: Payment[];
 }
 

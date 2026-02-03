@@ -38,11 +38,11 @@
             <h4 class="section-title">Bill Information</h4>
             <div class="review-item">
               <span class="label">Biller</span>
-              <span class="value">{{ bill?.billerName }}</span>
+              <span class="value">{{ bill?.biller_name }}</span>
             </div>
             <div class="review-item">
               <span class="label">Bill ID</span>
-              <span class="value monospace">{{ bill?.id }}</span>
+              <span class="value monospace">{{ bill?.bill_id }}</span>
             </div>
             <div class="review-item">
               <span class="label">Category</span>
@@ -50,7 +50,7 @@
             </div>
             <div class="review-item">
               <span class="label">Due Date</span>
-              <span class="value">{{ bill?.dueDate | date: 'MMM dd, yyyy' }}</span>
+              <span class="value">{{ bill?.due_date | date: 'MMM dd, yyyy' }}</span>
             </div>
           </div>
 
@@ -80,7 +80,7 @@
                 I agree to pay
                 <strong>{{ formatCurrency(bill?.amount) }}</strong>
                 to
-                <strong>{{ bill?.billerName }}</strong>
+                <strong>{{ bill?.biller_name }}</strong>
               </span>
             </label>
           </div>
@@ -240,7 +240,7 @@
             Your payment of
             <strong>{{ formatCurrency(bill?.amount) }}</strong>
             to
-            <strong>{{ bill?.billerName }}</strong>
+            <strong>{{ bill?.biller_name }}</strong>
             has been initiated.
           </p>
 

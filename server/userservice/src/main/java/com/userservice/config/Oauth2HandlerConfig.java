@@ -47,7 +47,7 @@ public class Oauth2HandlerConfig implements AuthenticationSuccessHandler {
                 });
         
         // Generate JWT token
-        String jwtToken = oauthService.generateToken(user.getUsername());
+        String jwtToken = oauthService.generateToken(user.getUsername(), user.getEmail(), user.getUserId());
         
         // Redirect to frontend with token
         response.sendRedirect("http://localhost:4200/login?token=" + jwtToken);

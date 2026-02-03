@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.userservice.dto.AuthRequest;
 import com.userservice.models.Users;
+import com.userservice.repositories.UsersRepository;
 import com.userservice.services.OauthService;
 import com.userservice.services.UsersService;
 
@@ -76,8 +77,10 @@ public class LoginController {
             
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
+            Users user = usersService.getUserByUsernameOrThrow(authRequest.getUsername());
+
             if (authentication.isAuthenticated()) {
-                String bearerToken = oauthService.generateToken(authRequest.getUsername());
+                String bearerToken = oauthService.generateToken(authRequest.getUsername(), user.getEmail(), user.getUserId());
                 userData.put("access_token", bearerToken);
                 userData.put("user_details", usersService.getUserByUsernameOrThrow(authRequest.getUsername()));
             }

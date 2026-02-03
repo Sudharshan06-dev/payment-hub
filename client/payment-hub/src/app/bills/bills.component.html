@@ -74,7 +74,7 @@
         <label class="filter-label">Status:</label>
         <div class="filter-buttons">
           <button
-            *ngFor="let status of ['ALL', 'DUE', 'OVERDUE', 'PENDING', 'PAID']"
+            *ngFor="let status of ['ALL', 'OVERDUE', 'PENDING', 'PAID']"
             class="filter-btn"
             [class.active]="statusFilter === status"
             (click)="onStatusFilterChange(status)"
@@ -88,9 +88,9 @@
       <div class="filter-group">
         <label class="filter-label">Sort by:</label>
         <select class="sort-select" (change)="onSortChange($event.target)">
-          <option value="dueDate">Due Date (Nearest First)</option>
+          <option value="due_date">Due Date (Nearest First)</option>
           <option value="amount">Amount (Highest First)</option>
-          <option value="billerName">Biller Name (A-Z)</option>
+          <option value="biller_name">Biller Name (A-Z)</option>
         </select>
       </div>
     </div>
@@ -119,17 +119,17 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let bill of paginatedBills" class="bill-row" [class.overdue]="bill.status === 'OVERDUE'">
+        <tr *ngFor="let bill of paginatedBills" class="bill-row" [class.overdue]="bill.bill_status === 'OVERDUE'">
           <!-- Biller Info -->
           <td class="col-biller">
             <div class="biller-info">
               <div class="biller-logo">
-                <span *ngIf="!bill.billerLogo" class="material-icons">store</span>
-                <img *ngIf="bill.billerLogo" [src]="bill.billerLogo" [alt]="bill.billerName" />
+                <span *ngIf="!bill.biller_logo" class="material-icons">store</span>
+                <img *ngIf="bill.biller_logo" [src]="bill.biller_logo" [alt]="bill.biller_name" />
               </div>
               <div class="biller-details">
-                <p class="biller-name">{{ bill.billerName }}</p>
-                <p class="bill-id">{{ bill.id }}</p>
+                <p class="biller-name">{{ bill.biller_name }}</p>
+                <p class="bill-id">{{ bill.bill_id }}</p>
               </div>
             </div>
           </td>
@@ -142,14 +142,14 @@
           <!-- Amount -->
           <td class="col-amount">
             <p class="amount-value">{{ formatCurrency(bill.amount) }}</p>
-            <p *ngIf="bill.recurring" class="recurring-badge">Recurring</p>
+            <p *ngIf="bill.bill_frequency && bill.bill_frequency !== 'ONE_TIME'" class="recurring-badge">{{ bill.bill_frequency }}</p>
           </td>
 
           <!-- Due Date & Days -->
           <td class="col-due">
-            <p class="due-date">{{ bill.dueDate | date: 'MMM dd, yyyy' }}</p>
-            <p class="days-until" [class.overdue]="getDaysUntilDue(bill.dueDate) < 0">
-              {{ getDaysUntilDueText(bill.dueDate) }}
+            <p class="due-date">{{ bill.due_date | date: 'MMM dd, yyyy' }}</p>
+            <p class="days-until" [class.overdue]="getDaysUntilDue(bill.due_date) < 0">
+              {{ getDaysUntilDueText(bill.due_date) }}
             </p>
           </td>
 
@@ -157,24 +157,24 @@
           <td class="col-status">
             <span 
               class="status-badge"
-              [ngClass]="statusBadgeClass[bill.status]"
+              [ngClass]="statusBadgeClass[bill.bill_status]"
             >
-              <span class="material-icons status-icon">{{ statusBadgeIcon[bill.status] }}</span>
-              {{ bill.status }}
+              <span class="material-icons status-icon">{{ statusBadgeIcon[bill.bill_status] }}</span>
+              {{ bill.bill_status }}
             </span>
           </td>
 
           <!-- Action Button -->
           <td class="col-action">
             <button
-              *ngIf="bill.status !== 'PAID'"
+              *ngIf="bill.bill_status !== 'PAID'"
               class="btn btn-pay"
               (click)="openPaymentModal(bill)"
             >
               <span class="material-icons">payment</span>
               Pay
             </button>
-            <span *ngIf="bill.status === 'PAID'" class="paid-label">
+            <span *ngIf="bill.bill_status === 'PAID'" class="paid-label">
               <span class="material-icons">check_circle</span>
               Paid
             </span>

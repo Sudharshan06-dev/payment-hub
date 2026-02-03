@@ -196,7 +196,7 @@ export class PaymentComponent implements OnInit {
 
     const formValue = this.paymentForm.getRawValue();
     const paymentRequest: PaymentInitiationRequest = {
-      billId: this.bill?.id,
+      billId: this.bill?.bill_id,
       amount: this.bill?.amount,
       cardNumber: formValue.cardNumber,
       cardExpiry: formValue.expiry,
@@ -211,7 +211,7 @@ export class PaymentComponent implements OnInit {
           this.success = true;
           this.paymentStep = 'confirm';
           setTimeout(() => {
-            this.onSuccess.emit(this.bill?.id);
+            this.onSuccess.emit(this.bill?.bill_id);
           }, 2000);
 
         } else {

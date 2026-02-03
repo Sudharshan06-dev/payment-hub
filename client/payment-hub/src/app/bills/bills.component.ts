@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RequestService } from '../../services/request.service';
 import { Bill, BillsResponse, BillStatus } from '../../bill.model';
+import { BillDataService } from '../../services/bill-data.service';
 import { CommonModule } from '@angular/common';
 import { PaymentComponent } from "../payment/payment.component";
 import { ToastrService } from 'ngx-toastr'; // Add toast service for notifications
@@ -37,7 +38,7 @@ export class BillsComponent implements OnInit, OnDestroy {
 
   // Filters and sorting
   statusFilter: 'ALL' | BillStatus = 'ALL';
-  sortBy: 'dueDate' | 'amount' | 'billerName' = 'dueDate';
+  sortBy: 'due_date' | 'amount' | 'biller_name' = 'due_date';
   searchQuery = '';
   daysFilter: number = 30;
 
@@ -67,7 +68,8 @@ export class BillsComponent implements OnInit, OnDestroy {
     private requestService: RequestService,
     private router: Router,
     private localStorage: LocalStorageHelper,
-    private toastService: ToasterHelper // Inject toast service
+    private toastService: ToasterHelper,
+    private billDataService: BillDataService // Inject BillDataService
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +86,7 @@ export class BillsComponent implements OnInit, OnDestroy {
    */
   loadBills(): void {
     this.isLoading = true;
+    this.billDataService.setLoading(true);
     this.error = null;
 
     const url = `${this.API_BASE_PATH}/${this.userId}`;
@@ -94,14 +97,17 @@ export class BillsComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         if (response.success && response.data) {
           this.bills = response.data;
+          this.billDataService.setBills(this.bills); // Emit to sidebar
           this.loadBillStatistics();
           this.getTotalAmountOwed();
           this.applyFiltersAndSort();
           this.updatePagination();
           this.isLoading = false;
+          this.billDataService.setLoading(false);
         } else {
           this.error = response.message || 'Failed to load bills';
           this.isLoading = false;
+          this.billDataService.setLoading(false);
         }
       },
       error: (err: any) => {
@@ -109,6 +115,7 @@ export class BillsComponent implements OnInit, OnDestroy {
         this.error = err?.error?.message || 'Failed to load bills. Please try again.';
         this.toastService.error(this.error);
         this.isLoading = false;
+        this.billDataService.setLoading(false);
       }
     });
   }
@@ -128,10 +135,11 @@ export class BillsComponent implements OnInit, OnDestroy {
           this.billStats = {
             bills: this.bills,
             total: this.bills.length,
-            pending: stats.pendingCount || 0,
-            due: stats.dueCount || 0,
-            overdue: stats.overdueCount || 0
+            pending: stats.pending || 0,
+            due: stats.due || 0,
+            overdue: stats.overdue || 0
           };
+          this.billDataService.setBillStats(this.billStats); // Emit to sidebar
         }
       },
       error: (err: any) => {
@@ -147,9 +155,9 @@ export class BillsComponent implements OnInit, OnDestroy {
    */
   private calculateStatistics(): void {
     const total = this.bills.length;
-    const pending = this.bills.filter(b => b.status === BillStatus.PENDING).length;
-    const due = this.bills.filter(b => b.status === BillStatus.DUE).length;
-    const overdue = this.bills.filter(b => b.status === BillStatus.OVERDUE).length;
+    const pending = this.bills.filter(b => b.bill_status === BillStatus.PENDING).length;
+    const due = this.bills.filter(b => b.bill_status === BillStatus.DUE).length;
+    const overdue = this.bills.filter(b => b.bill_status === BillStatus.OVERDUE).length;
 
     this.billStats = {
       bills: this.bills,
@@ -158,6 +166,7 @@ export class BillsComponent implements OnInit, OnDestroy {
       due,
       overdue
     };
+    this.billDataService.setBillStats(this.billStats); // Emit to sidebar
   }
 
   /**
@@ -178,7 +187,7 @@ export class BillsComponent implements OnInit, OnDestroy {
         console.error('Error loading total amount owed:', err);
         // Fallback: calculate from bills
         this.totalAmountOwed = this.bills
-          .filter(b => b.status !== BillStatus.PAID)
+          .filter(b => b.bill_status !== BillStatus.PAID)
           .reduce((sum, bill : any) => sum + bill.amount, 0);
       }
     });
@@ -191,7 +200,9 @@ export class BillsComponent implements OnInit, OnDestroy {
     this.searchQuery = query?.value;
     this.currentPage = 0;
 
-    if (!query || query.trim() === '') {
+    console.log(this.searchQuery);
+
+    if (!query) {
       this.applyFiltersAndSort();
       this.updatePagination();
       return;
@@ -237,7 +248,7 @@ export class BillsComponent implements OnInit, OnDestroy {
 
     // Call API to get bills by status
     this.isLoading = true;
-    const url = `${this.API_BASE_PATH}/${this.userId}/status/${status}`;
+    const url = `${this.API_BASE_PATH}/${this.userId}/status/${status.toLowerCase()}`;
 
     this.requestService.get(url).pipe(
       takeUntil(this.destroy$)
@@ -379,7 +390,7 @@ export class BillsComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response: any) => {
         if (response.success) {
-          const index = this.bills.findIndex((b: any) => b.id === billId);
+          const index = this.bills.findIndex((b: any) => b.bill_id === billId);
           if (index !== -1) {
             this.bills[index] = response.data;
             this.applyFiltersAndSort();
@@ -410,7 +421,7 @@ export class BillsComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response: any) => {
         if (response.success) {
-          this.bills = this.bills.filter((b: any) => b.id !== billId);
+          this.bills = this.bills.filter((b: any) => b.bill_id !== billId);
           this.applyFiltersAndSort();
           this.updatePagination();
           this.loadBillStatistics();
@@ -435,9 +446,9 @@ export class BillsComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: (response: any) => {
         if (response.success) {
-          const bill = this.bills.find((b: any) => b.id === billId);
+          const bill = this.bills.find((b: any) => b.bill_id === billId);
           if (bill) {
-            bill.status = BillStatus.PAID;
+            bill.bill_status = BillStatus.PAID;
             this.applyFiltersAndSort();
             this.updatePagination();
             this.loadBillStatistics();
@@ -461,15 +472,15 @@ export class BillsComponent implements OnInit, OnDestroy {
 
     // Apply status filter if not ALL
     if (this.statusFilter !== 'ALL') {
-      result = result.filter(bill => bill.status === this.statusFilter);
+      result = result.filter(bill => bill.bill_status === this.statusFilter);
     }
 
     // Apply search filter
     if (this.searchQuery.trim()) {
       const query = this.searchQuery.toLowerCase();
       result = result.filter(bill =>
-        bill.billerName.toLowerCase().includes(query) ||
-        bill.id?.toString().toLowerCase().includes(query) ||
+        bill.biller_name.toLowerCase().includes(query) ||
+        bill.bill_id?.toString().toLowerCase().includes(query) ||
         bill.category?.toLowerCase().includes(query)
       );
     }
@@ -477,11 +488,11 @@ export class BillsComponent implements OnInit, OnDestroy {
     // Apply sorting
     result.sort((a: any, b: any) => {
       switch (this.sortBy) {
-        case 'dueDate':
+        case 'due_date':
           return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         case 'amount':
           return b.amount - a.amount;
-        case 'billerName':
+        case 'biller_name':
           return a.billerName.localeCompare(b.billerName);
         default:
           return 0;
@@ -570,7 +581,7 @@ export class BillsComponent implements OnInit, OnDestroy {
   /**
    * Get days until due
    */
-  getDaysUntilDue(dueDate: Date): number {
+  getDaysUntilDue(dueDate: string | Date): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -584,7 +595,7 @@ export class BillsComponent implements OnInit, OnDestroy {
   /**
    * Get days until due text
    */
-  getDaysUntilDueText(dueDate: Date): string {
+  getDaysUntilDueText(dueDate: string | Date): string {
     const days = this.getDaysUntilDue(dueDate);
 
     if (days < 0) {
