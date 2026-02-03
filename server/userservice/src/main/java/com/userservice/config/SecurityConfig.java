@@ -62,7 +62,7 @@ public class SecurityConfig {
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                         .authenticationProvider(authenticationProvider())
                         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                        .cors(c -> c.configurationSource(customCorsConfig))
+                        //.cors(c -> c.configurationSource(customCorsConfig))
                         .build();
     }
 

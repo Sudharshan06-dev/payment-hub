@@ -1,48 +1,55 @@
 package com.userservice.services;
 
-import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.io.IOException;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
+import java.security.PublicKey;
 
 @Service
 public class OauthService {
 
-    private String secretKey;
+    @Value("${rsa.private-key}")
+    private Resource privateKeyResource;
 
-    public OauthService() {
-        secretKey = generateSecretKey();
+    private PrivateKey privateKey;
+
+    @Autowired
+    public void init() throws Exception {
+        this.privateKey = loadPrivateKey();
     }
 
-    public String generateSecretKey() {
+    private PrivateKey loadPrivateKey() throws Exception {
+        String key = new String(privateKeyResource.getInputStream().readAllBytes())
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
 
-        try {
+        byte[] decodedKey = java.util.Base64.getDecoder().decode(key);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(decodedKey);
+        return keyFactory.generatePrivate(spec);
+    }
 
-            KeyGenerator keyGenerator = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey secretKey = keyGenerator.generateKey();
-            return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error generating secret key", e);
-        }
+    public PublicKey getPublicKey() throws Exception {
+        java.security.KeyPair keyPair = java.security.KeyPairGenerator.getInstance("RSA").generateKeyPair();
+        return keyPair.getPublic();
     }
 
     public String generateToken(String username) {
-
         Map<String, Object> claims = new HashMap<>();
 
         return Jwts
@@ -51,12 +58,8 @@ public class OauthService {
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * (60 * 60 * 24)))
-                .signWith(getKey()).compact();
-    }
-
-    private Key getKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
+                .signWith(privateKey)
+                .compact();
     }
 
     public String extractUserName(String token) {
@@ -70,11 +73,11 @@ public class OauthService {
 
     private Claims extractAllClaims(String token) {
         return Jwts
-        .parser()
-        .setSigningKey(getKey())
-        .build()
-        .parseClaimsJwt(token)
-        .getBody();
+                .parser()
+                .verifyWith((java.security.PublicKey) privateKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean validateToken(String token, UserDetails userDetails) {

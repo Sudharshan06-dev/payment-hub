@@ -11,7 +11,7 @@ export enum BillStatus {
 }
 
 export interface Bill {
-  id: string;
+  id: number;
   billerId: string;
   billerName: string;
   billerLogo?: string;

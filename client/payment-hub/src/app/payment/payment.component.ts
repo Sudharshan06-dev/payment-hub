@@ -16,7 +16,7 @@ import { Bill, PaymentInitiationRequest } from '../../bill.model';
 export class PaymentComponent implements OnInit {
   @Input() bill!: Bill  | null;
   @Output() onClose = new EventEmitter<void>();
-  @Output() onSuccess = new EventEmitter<string>();
+  @Output() onSuccess = new EventEmitter<number>();
 
   paymentForm!: FormGroup;
   isProcessing = false;
