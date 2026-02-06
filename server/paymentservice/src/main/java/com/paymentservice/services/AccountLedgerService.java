@@ -13,8 +13,12 @@ import com.paymentservice.repositories.AccountLedgerRepository;
 @Transactional
 public class AccountLedgerService {
     
+    private final AccountLedgerRepository ledgerRepository;
+
     @Autowired
-    private AccountLedgerRepository ledgerRepository;
+    public AccountLedgerService(AccountLedgerRepository ledgerRepository) {
+        this.ledgerRepository = ledgerRepository;
+    }
     
     /**
      * Record a new transaction in the ledger
@@ -75,7 +79,7 @@ public class AccountLedgerService {
             throw new RuntimeException("Account ID is required");
         }
         
-        AccountLedger latest = ledgerRepository.getLatestLedgerEntry(accountId);
+        AccountLedger latest = ledgerRepository.findFirstByAccountIdOrderByCreatedAtDesc(accountId);
         
         if (latest == null) {
             throw new RuntimeException("No ledger entries found for account: " + accountId);

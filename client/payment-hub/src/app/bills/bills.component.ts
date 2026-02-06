@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { RequestService } from '../../services/request.service';
-import { Bill, BillsResponse, BillStatus } from '../../bill.model';
 import { BillDataService } from '../../services/bill-data.service';
 import { CommonModule } from '@angular/common';
 import { PaymentComponent } from "../payment/payment.component";
@@ -11,6 +10,7 @@ import { ToastrService } from 'ngx-toastr'; // Add toast service for notificatio
 import { BILL_PATH } from '../../environment';
 import { ToasterHelper } from '../../services/toast.service';
 import { LocalStorageHelper } from '../../services/local-storage.service';
+import { BillStatus,  Bill, BillsResponse } from '../models/bill.model';
 
 @Component({
   selector: 'app-bills',

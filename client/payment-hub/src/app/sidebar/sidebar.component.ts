@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { BillsResponse, Bill } from '../../bill.model';
+import { BillsResponse, Bill } from '../models/bill.model';
 import { CommonModule } from '@angular/common';
 import { BillDataService } from '../../services/bill-data.service';
 import { Subject } from 'rxjs';
@@ -34,11 +34,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   menuItems = [
-    { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
-    { label: 'Bills', icon: 'receipt_long', route: '/dashboard' },
-    { label: 'Payments', icon: 'payment', route: '/payments' },
-    { label: 'Settings', icon: 'settings', route: '/settings' },
-    { label: 'Help', icon: 'help', route: '/help' }
+    { label: 'Dashboard', icon: 'dashboard', route: 'dashboard' },
+    { label: 'Bills', icon: 'receipt_long', route: 'bills' },
+    { label: 'Payments', icon: 'payment', route: 'payments' },
+    { label: 'Settings', icon: 'settings', route: 'settings' },
+    { label: 'Help', icon: 'help', route: 'help' }
   ];
 
   constructor(private router: Router, private billDataService: BillDataService, private localStorage: LocalStorageHelper) {
@@ -90,11 +90,17 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   navigate(route: string): void {
-    this.router.navigate([route]);
+    // Navigate to full path
+    if (route === 'bills' || route == 'dashboard') {
+      this.router.navigate(['/dashboard']);  // Default route
+    } else {
+      this.router.navigate([`/dashboard/${route}`]);  // Child route
+    }
   }
 
-  logout(): void {
-    // Implement logout logic
+ logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
     this.router.navigate(['/login']);
   }
 

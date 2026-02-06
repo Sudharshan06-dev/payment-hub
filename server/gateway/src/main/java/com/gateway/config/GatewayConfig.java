@@ -17,6 +17,10 @@ public class GatewayConfig {
                 .route("user-service", r -> r
                         .path("/api/v1/users/**", "/api/v1/auth/**")
                         .uri("http://localhost:8081"))
+                
+                .route("account-service", r -> r 
+                        .path("/api/v1/accounts/**")
+                        .uri("http://localhost:8081"))
 
                 // Bill Service Routes
                 .route("bill-service", r -> r

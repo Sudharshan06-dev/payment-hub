@@ -4,7 +4,7 @@ import { RequestService } from '../../services/request.service';
 import { CommonModule } from '@angular/common';
 import { PAYMENT_PATH } from '../../environment';
 import { ToasterHelper } from '../../services/toast.service';
-import { Bill, PaymentInitiationRequest } from '../../bill.model';
+import { Bill, PaymentInitiationRequest,  } from '../models/bill.model';
 
 @Component({
   selector: 'app-payment',

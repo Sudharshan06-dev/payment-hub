@@ -35,7 +35,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
     /**
      * Get all transactions for a specific payment
      */
-    List<AccountLedger> findByPaymentId(Long paymentId);
+    //List<AccountLedger> findByPaymentId(Long paymentId);
 
     /**
      * Get all transactions for a specific payment
@@ -53,7 +53,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
      * Get ledger entries for account created between dates (for statements)
      */
     @Query("""
-        SELECT l FROM account_ledger l 
+        SELECT l FROM AccountLedger l 
         WHERE l.accountId = :accountId 
         AND l.createdAt >= :startDate 
         AND l.createdAt < :endDate 
@@ -70,7 +70,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
      * Get only debit transactions for an account (money going out)
      */
     @Query("""
-        SELECT l FROM account_ledger l 
+        SELECT l FROM AccountLedger l 
         WHERE l.accountId = :accountId 
         AND l.transactionType = 'DEBIT'
         ORDER BY l.createdAt DESC
@@ -81,7 +81,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
      * Get only credit transactions for an account (money coming in)
      */
     @Query("""
-        SELECT l FROM account_ledger l 
+        SELECT l FROM AccountLedger l 
         WHERE l.accountId = :accountId 
         AND l.transactionType = 'CREDIT'
         ORDER BY l.createdAt DESC
@@ -92,7 +92,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
      * Get total debits for account (money paid out)
      */
     @Query(value = """
-        SELECT SUM(l.amount) FROM account_ledger l 
+        SELECT SUM(l.amount) FROM AccountLedger l 
         WHERE l.account_id = :accountId 
         AND l.transaction_type = 'DEBIT'
     """, nativeQuery = true)
@@ -102,7 +102,7 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
      * Get total credits for account (money received)
      */
     @Query(value = """
-        SELECT SUM(l.amount) FROM account_ledger l 
+        SELECT SUM(l.amount) FROM AccountLedger l 
         WHERE l.account_id = :accountId 
         AND l.transaction_type = 'CREDIT'
     """, nativeQuery = true)
@@ -111,25 +111,20 @@ public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Lo
     /**
      * Get latest balance for an account
      */
-    @Query("""
-        SELECT l.balanceAfter FROM account_ledger l 
-        WHERE l.accountId = :accountId 
-        ORDER BY l.createdAt DESC 
-        LIMIT 1
-    """)
+    @Query(value = "SELECT l.balance_after FROM AccountLedger l WHERE l.account_id = :accountId ORDER BY l.created_at DESC LIMIT 1", nativeQuery = true)
     Double getLatestBalanceForAccount(@Param("accountId") Long accountId);
     
     /**
      * Get ledger entries created today (for daily reports)
      */
-    @Query("SELECT l FROM account_ledger l WHERE DATE(l.createdAt) = CURRENT_DATE")
+    @Query("SELECT l FROM AccountLedger l WHERE DATE(l.createdAt) = CURRENT_DATE")
     List<AccountLedger> findTodayTransactions();
 
     /**
      * Get latest ledger entry for an account (to get current balance)
      */
-    @Query("SELECT al FROM account_ledger al WHERE al.accountId = :accountId ORDER BY al.createdAt DESC LIMIT 1")
-    AccountLedger getLatestLedgerEntry(@Param("accountId") Long accountId);
+    // Use derived query to get the latest ledger entry (avoids LIMIT in JPQL)
+    AccountLedger findFirstByAccountIdOrderByCreatedAtDesc(Long accountId);
     
     /**
      * Get transaction count for account

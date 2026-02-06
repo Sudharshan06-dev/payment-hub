@@ -1,0 +1,227 @@
+<div class="container-fluid settings-container my-5">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h1 class="mb-2">
+        <i class="fas fa-cog"></i> Settings
+      </h1>
+      <p class="text-muted">Manage your account details</p>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Accounts List Section -->
+    <div class="col-12">
+      <div class="card">
+        <!-- Card Header -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="fas fa-list"></i> My Accounts
+          </h5>
+          <button class="btn btn-light btn-sm" (click)="addNewAccount()" [disabled]="isFormVisible">
+            <i class="fas fa-plus"></i> Add Account
+          </button>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+          <!-- Loading State -->
+          <div *ngIf="isLoadingAccounts" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Loading accounts...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div *ngIf="!isLoadingAccounts && accounts.length === 0 && !isFormVisible" class="text-center py-5">
+            <i class="fas fa-inbox" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="mt-3 text-muted">No accounts yet. Create your first account.</p>
+            <button class="btn btn-primary" (click)="addNewAccount()">
+              <i class="fas fa-plus"></i> Add Account
+            </button>
+          </div>
+
+          <!-- Accounts Table -->
+          <div *ngIf="!isLoadingAccounts && accounts.length > 0 && !isFormVisible" class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Account Number</th>
+                  <th>Type</th>
+                  <th>Balance</th>
+                  <th>Currency</th>
+                  <th>Status</th>
+                  <th>Active</th>
+                  <th width="200">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let account of accounts">
+                  <!-- Account Number -->
+                  <td>
+                    <code class="text-dark">{{ maskAccountNumber(account.accountNumber) }}</code>
+                  </td>
+
+                  <!-- Type -->
+                  <td>
+                    <span class="badge bg-info">{{ account.accountType }}</span>
+                  </td>
+
+                  <!-- Balance -->
+                  <td>
+                    <strong class="text-success">{{ formatCurrency(account.balance, account.currency) }}</strong>
+                  </td>
+
+                  <!-- Currency -->
+                  <td>
+                    {{ account.currency }}
+                  </td>
+
+                  <!-- Status -->
+                  <td>
+                    <span [ngClass]="'badge ' + getStatusBadgeClass(account.status)">
+                      {{ account.status }}
+                    </span>
+                  </td>
+
+                  <!-- Active -->
+                  <td>
+                    <i *ngIf="account.isActive" class="fas fa-check-circle text-success"></i>
+                    <i *ngIf="!account.isActive" class="fas fa-times-circle text-danger"></i>
+                  </td>
+
+                  <!-- Actions -->
+                  <td>
+                    <button class="btn btn-sm btn-outline-primary me-2" 
+                            (click)="editAccount(account)"
+                            title="Edit">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" 
+                            (click)="deleteAccount(account)"
+                            title="Delete">
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Add/Edit Form -->
+          <div *ngIf="isFormVisible" class="form-section">
+            <div class="form-header mb-4 pb-3 border-bottom">
+              <h5 class="mb-0">
+                <i class="fas fa-credit-card"></i>
+                {{ isEditMode ? 'Edit Account' : 'Add New Account' }}
+              </h5>
+            </div>
+
+            <form [formGroup]="accountForm" (ngSubmit)="saveAccount()">
+              <div class="row">
+                <!-- Account Number -->
+                <div class="col-md-6 mb-3">
+                  <label for="accountNumber" class="form-label">
+                    Account Number <span class="text-danger">*</span>
+                  </label>
+                  <input type="text" class="form-control" id="accountNumber" 
+                         formControlName="accountNumber"
+                         placeholder="Enter account number"
+                         [class.is-invalid]="accountForm.get('accountNumber')?.invalid && accountForm.get('accountNumber')?.touched">
+                  <small class="text-danger" *ngIf="accountForm.get('accountNumber')?.invalid && accountForm.get('accountNumber')?.touched">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Account number is required (minimum 8 characters)
+                  </small>
+                </div>
+
+                <!-- Account Type -->
+                <div class="col-md-6 mb-3">
+                  <label for="accountType" class="form-label">
+                    Account Type <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select" id="accountType" formControlName="accountType">
+                    <option value="CHECKING">Checking</option>
+                    <option value="SAVINGS">Savings</option>
+                    <option value="MONEY_MARKET">Money Market</option>
+                  </select>
+                </div>
+
+                <!-- Balance -->
+                <div class="col-md-6 mb-3">
+                  <label for="balance" class="form-label">
+                    Balance <span class="text-danger">*</span>
+                  </label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="balance" 
+                           formControlName="balance"
+                           placeholder="0.00" step="0.01" min="0"
+                           [class.is-invalid]="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched">
+                  </div>
+                  <small class="text-danger" *ngIf="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Balance must be a positive number
+                  </small>
+                </div>
+
+                <!-- Currency -->
+                <div class="col-md-6 mb-3">
+                  <label for="currency" class="form-label">
+                    Currency <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select" id="currency" formControlName="currency">
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound</option>
+                    <option value="INR">INR - Indian Rupee</option>
+                  </select>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-6 mb-3">
+                  <label for="status" class="form-label">
+                    Status <span class="text-danger">*</span>
+                  </label>
+                  <select class="form-select" id="status" formControlName="status">
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="FROZEN">Frozen</option>
+                    <option value="CLOSED">Closed</option>
+                  </select>
+                </div>
+
+                <!-- Is Active -->
+                <div class="col-md-6 mb-3">
+                  <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="isActive" formControlName="isActive">
+                    <label class="form-check-label" for="isActive">
+                      Account is Active
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="form-actions mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-primary" [disabled]="!isFormValid">
+                  <span *ngIf="!isSubmitting">
+                    <i class="fas fa-save"></i> {{ formButtonText }}
+                  </span>
+                  <span *ngIf="isSubmitting">
+                    <span class="spinner-border spinner-border-sm me-2"></span> Saving...
+                  </span>
+                </button>
+                <button type="button" class="btn btn-secondary ms-2" 
+                        (click)="cancelForm()"
+                        [disabled]="isSubmitting">
+                  <i class="fas fa-times"></i> Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

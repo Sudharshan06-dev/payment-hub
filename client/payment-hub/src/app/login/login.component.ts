@@ -245,6 +245,7 @@ export class LoginComponent implements OnInit {
   }
 
   public redirectToGoogleAuth() {
+    console.log('sfsfsdfsdf');
     window.location.href = 'http://localhost:8081/oauth2/authorization/google';
   }
 

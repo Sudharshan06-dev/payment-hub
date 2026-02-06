@@ -36,7 +36,7 @@ public class Accounts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountId;
-
+    
     @Column(nullable = false, unique = true)
     private String accountNumber;
 

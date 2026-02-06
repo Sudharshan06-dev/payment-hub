@@ -16,6 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -32,15 +34,6 @@ public class SecurityConfig {
     @Autowired
     private Oauth2HandlerConfig oauth2HandlerConfig;
 
-    // Main security filter chain -> using the JWT filter to authenticate and
-    // authorize users
-
-    /*
-     * Main security configuration
-     * Defines endpoint access rules and JWT filter setup
-     * Replaces the default security filter chain by the spring -> uses this custom
-     * filter chain for all the requests
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
@@ -52,35 +45,40 @@ public class SecurityConfig {
                                 "/login/**")
                         .permitAll()
                         .anyRequest().authenticated())
-                        .oauth2Login(oauth2 -> oauth2
+                .oauth2Login(oauth2 -> oauth2
                         .successHandler(oauth2HandlerConfig)
                         .failureHandler((req, res, ex) -> {
                             ex.printStackTrace();
-                            res.sendRedirect(
-                                    "http://localhost:4200/login?error=oauth_failed");
+                            res.sendRedirect("http://localhost:4200/login?error=oauth_failed");
                         }))
-                        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                        .authenticationProvider(authenticationProvider())
-                        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                        //.cors(c -> c.configurationSource(customCorsConfig))
-                        .build();
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            String requestUri = request.getRequestURI();
+                            
+                            if (requestUri.startsWith("/api/")) {
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json");
+                                response.setCharacterEncoding("UTF-8");
+                                response.getWriter().write(
+                                    "{\"success\":false,\"message\":\"Unauthorized: " + 
+                                    authException.getMessage() + "\",\"data\":null}"
+                                );
+                                response.getWriter().flush();
+                            } else {
+                                response.sendRedirect("/oauth2/authorization/google");
+                            }
+                        }))
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
-    /*
-     * Password encoder bean (uses BCrypt hashing)
-     * Critical for secure password storage
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /*
-     * Authentication provider configuration
-     * Links UserDetailsService and PasswordEncoder
-     * DaoAuthenticationProvider - This class is implements AuthenticationProvider
-     * interface for authenticating / authorizing the users from the database
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
@@ -88,13 +86,8 @@ public class SecurityConfig {
         return provider;
     }
 
-    /*
-     * Authentication manager bean
-     * Required for programmatic authentication (e.g., in /generateToken)
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
 }
