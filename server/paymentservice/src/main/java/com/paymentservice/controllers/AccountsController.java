@@ -1,4 +1,4 @@
-package com.userservice.controllers;
+package com.paymentservice.controllers;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.userservice.dto.AccountResponse;
-import com.userservice.models.Accounts;
-import com.userservice.services.AccountsService;
+import com.paymentservice.dto.AccountResponse;
+import com.paymentservice.models.Accounts;
+import com.paymentservice.services.AccountsService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -29,19 +30,15 @@ public class AccountsController {
     @Autowired
     private AccountsService accountsService;
 
-    /**
-     * GET /api/v1/users/{userId}/accounts
-     * Get all accounts for a user
-     * 
-     * @param userId - User ID
-     * @return List of accounts with success response
-     */
     @GetMapping("/{userId}")
-    public ResponseEntity<AccountResponse<List<Accounts>>> getAllAccounts(@PathVariable Long userId) {
+    public ResponseEntity<AccountResponse<List<Accounts>>> getAllAccounts(
+            @PathVariable Long userId, 
+            HttpServletRequest request) {
+        
         log.info("GET request: Fetch all accounts for user: {}", userId);
         
         try {
-            List<Accounts> accounts = accountsService.getAllAccountsByUserId(userId);
+            List<Accounts> accounts = accountsService.getAllAccountsByUserId(userId, request);
             
             return ResponseEntity.ok(
                 AccountResponse.<List<Accounts>>builder()
@@ -62,14 +59,6 @@ public class AccountsController {
         }
     }
 
-    /**
-     * GET /api/v1/users/{userId}/accounts/{accountId}
-     * Get a specific account
-     * 
-     * @param userId - User ID
-     * @param accountId - Account ID
-     * @return Single account with success response
-     */
     @GetMapping("/{userId}/{accountId}")
     public ResponseEntity<AccountResponse<Accounts>> getAccountById(
             @PathVariable Long userId,
@@ -99,132 +88,16 @@ public class AccountsController {
         }
     }
 
-    /**
-     * GET /api/v1/users/{userId}/accounts/active
-     * Get only active accounts
-     * 
-     * @param userId - User ID
-     * @return List of active accounts
-     */
-    @GetMapping("/{userId}/active")
-    public ResponseEntity<AccountResponse<List<Accounts>>> getActiveAccounts(@PathVariable Long userId) {
-        log.info("GET request: Fetch active accounts for user: {}", userId);
-        
-        try {
-            List<Accounts> accounts = accountsService.getActiveAccounts(userId);
-            
-            return ResponseEntity.ok(
-                AccountResponse.<List<Accounts>>builder()
-                    .success(true)
-                    .message("Active accounts retrieved successfully")
-                    .data(accounts)
-                    .build()
-            );
-        } catch (RuntimeException e) {
-            log.error("Error fetching active accounts for user: {}", userId, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                AccountResponse.<List<Accounts>>builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .data(null)
-                    .build()
-            );
-        }
-    }
-
-    /**
-     * GET /api/v1/users/{userId}/accounts/primary
-     * Get primary (first active) account
-     * 
-     * @param userId - User ID
-     * @return Primary account
-     */
-    @GetMapping("/{userId}/primary")
-    public ResponseEntity<AccountResponse<Accounts>> getPrimaryAccount(@PathVariable Long userId) {
-        log.info("GET request: Fetch primary account for user: {}", userId);
-        
-        try {
-            var account = accountsService.getPrimaryAccount(userId);
-            
-            if (account.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    AccountResponse.<Accounts>builder()
-                        .success(false)
-                        .message("No active account found")
-                        .data(null)
-                        .build()
-                );
-            }
-            
-            return ResponseEntity.ok(
-                AccountResponse.<Accounts>builder()
-                    .success(true)
-                    .message("Primary account retrieved successfully")
-                    .data(account.get())
-                    .build()
-            );
-        } catch (RuntimeException e) {
-            log.error("Error fetching primary account for user: {}", userId, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                AccountResponse.<Accounts>builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .data(null)
-                    .build()
-            );
-        }
-    }
-
-    /**
-     * GET /api/v1/users/{userId}/accounts/balance
-     * Get total balance across all accounts
-     * 
-     * @param userId - User ID
-     * @return Total balance
-     */
-    @GetMapping("/{userId}/balance")
-    public ResponseEntity<AccountResponse<BigDecimal>> getTotalBalance(@PathVariable Long userId) {
-        log.info("GET request: Fetch total balance for user: {}", userId);
-        
-        try {
-            BigDecimal totalBalance = accountsService.getTotalBalance(userId);
-            
-            return ResponseEntity.ok(
-                AccountResponse.<BigDecimal>builder()
-                    .success(true)
-                    .message("Total balance retrieved successfully")
-                    .data(totalBalance)
-                    .build()
-            );
-        } catch (RuntimeException e) {
-            log.error("Error fetching balance for user: {}", userId, e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                AccountResponse.<BigDecimal>builder()
-                    .success(false)
-                    .message(e.getMessage())
-                    .data(null)
-                    .build()
-            );
-        }
-    }
-
-    /**
-     * POST /api/v1/users/{userId}/accounts
-     * Create a new account
-     * 
-     * @param userId - User ID
-     * @param account - Account details to create
-     * @return Created account with HTTP 201 CREATED
-     */
     @PostMapping("/{userId}")
     public ResponseEntity<AccountResponse<Accounts>> createAccount(
             @PathVariable Long userId,
-            @RequestBody Accounts account) {
+            @RequestBody Accounts account, 
+            HttpServletRequest request) {
         
         log.info("POST request: Create account for user: {}", userId);
         
         try {
-            Accounts createdAccount = accountsService.createAccount(userId, account);
+            Accounts createdAccount = accountsService.createAccount(userId, account, request);
             
             return ResponseEntity.status(HttpStatus.CREATED).body(
                 AccountResponse.<Accounts>builder()
@@ -245,15 +118,6 @@ public class AccountsController {
         }
     }
 
-    /**
-     * PUT /api/v1/users/{userId}/accounts/{accountId}
-     * Update an existing account
-     * 
-     * @param userId - User ID
-     * @param accountId - Account ID to update
-     * @param accountDetails - New account details
-     * @return Updated account
-     */
     @PutMapping("/{userId}/{accountId}")
     public ResponseEntity<AccountResponse<Accounts>> updateAccount(
             @PathVariable Long userId,
@@ -284,14 +148,6 @@ public class AccountsController {
         }
     }
 
-    /**
-     * DELETE /api/v1/users/{userId}/accounts/{accountId}
-     * Soft delete an account
-     * 
-     * @param userId - User ID
-     * @param accountId - Account ID to delete
-     * @return Success message
-     */
     @DeleteMapping("/{userId}/{accountId}")
     public ResponseEntity<AccountResponse<Void>> deleteAccount(
             @PathVariable Long userId,
@@ -321,31 +177,24 @@ public class AccountsController {
         }
     }
 
-    /**
-     * GET /api/v1/users/{userId}/accounts/count
-     * Get total number of accounts for user
-     * 
-     * @param userId - User ID
-     * @return Account count
-     */
-    @GetMapping("/{userId}/count")
-    public ResponseEntity<AccountResponse<Long>> getAccountCount(@PathVariable Long userId) {
-        log.info("GET request: Fetch account count for user: {}", userId);
+    @GetMapping("/{userId}/balance")
+    public ResponseEntity<AccountResponse<BigDecimal>> getTotalBalance(@PathVariable Long userId) {
+        log.info("GET request: Fetch total balance for user: {}", userId);
         
         try {
-            long count = accountsService.countUserAccounts(userId);
+            BigDecimal totalBalance = accountsService.getTotalBalance(userId);
             
             return ResponseEntity.ok(
-                AccountResponse.<Long>builder()
+                AccountResponse.<BigDecimal>builder()
                     .success(true)
-                    .message("Account count retrieved successfully")
-                    .data(count)
+                    .message("Total balance retrieved successfully")
+                    .data(totalBalance)
                     .build()
             );
         } catch (RuntimeException e) {
-            log.error("Error fetching account count for user: {}", userId, e);
+            log.error("Error fetching balance for user: {}", userId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                AccountResponse.<Long>builder()
+                AccountResponse.<BigDecimal>builder()
                     .success(false)
                     .message(e.getMessage())
                     .data(null)
@@ -354,25 +203,17 @@ public class AccountsController {
         }
     }
 
-    /**
-     * POST /api/v1/users/{userId}/accounts/{accountId}/validate
-     * Validate if user can make a payment with this account
-     * 
-     * @param userId - User ID
-     * @param accountId - Account ID
-     * @param amount - Payment amount
-     * @return Validation result
-     */
     @PostMapping("/{userId}/{accountId}/validate")
     public ResponseEntity<AccountResponse<Boolean>> validatePayment(
             @PathVariable Long userId,
             @PathVariable Long accountId,
-            @RequestBody BigDecimal amount) {
+            @RequestBody BigDecimal amount,
+            HttpServletRequest request) {
         
         log.info("POST request: Validate payment for user: {} account: {} amount: {}", userId, accountId, amount);
         
         try {
-            accountsService.validateUserCanMakePayment(userId, accountId, amount);
+            accountsService.validateUserCanMakePayment(userId, accountId, amount, request);
             
             return ResponseEntity.ok(
                 AccountResponse.<Boolean>builder()

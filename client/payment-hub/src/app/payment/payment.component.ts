@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RequestService } from '../../services/request.service';
 import { CommonModule } from '@angular/common';
 import { PAYMENT_PATH } from '../../environment';
@@ -11,10 +11,26 @@ import { Bill, PaymentInitiationRequest,  } from '../models/bill.model';
   templateUrl: './payment.component.html',
   styleUrls: ['./payment.component.css'],
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule]
+  imports: [ReactiveFormsModule, CommonModule, FormsModule]
 })
 export class PaymentComponent implements OnInit {
-  @Input() bill!: Bill  | null;
+
+  private _bill: Bill | null = null;
+
+  @Input()
+  set bill(value: Bill | null) {
+    this._bill = value;
+    // Perform actions when value changes
+    if (value) {
+      console.log('New bill set:', value);
+    }
+  }
+
+  get bill(): Bill | null {
+    return this._bill;
+  }
+
+  
   @Output() onClose = new EventEmitter<void>();
   @Output() onSuccess = new EventEmitter<number>();
 
@@ -27,6 +43,7 @@ export class PaymentComponent implements OnInit {
   // Card validation
   cardNumberFormatted = '';
   cardTypeIcon: 'cc_visa' | 'cc_mastercard' | 'cc_amex' | 'credit_card' = 'credit_card';
+  agreeTerms:boolean =  false
 
   constructor(
     private fb: FormBuilder,
@@ -74,8 +91,7 @@ export class PaymentComponent implements OnInit {
       amount: [
         { value: this.bill?.amount, disabled: true },
         Validators.required
-      ],
-      agreeTerms: [false, Validators.requiredTrue]
+      ]
     });
   }
 

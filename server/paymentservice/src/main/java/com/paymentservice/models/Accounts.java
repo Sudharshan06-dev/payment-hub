@@ -1,16 +1,14 @@
-package com.userservice.models;
+package com.paymentservice.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import jakarta.persistence.EnumType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -18,40 +16,44 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * User Entity - Represents a customer in the BillHub system
- * 
- * Relationships:
- * - One User has many Accounts
- * - One User has many Bills
- * - One User has many Payments
- * - One User has many Notifications
- */
 @Entity
 @Table(name = "accounts")
-@Data // Generates getters, setters, equals, hashCode, toString
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Accounts {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountId;
+
+    @Column(nullable = false)
+    private Long userId;
     
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 16)
     private String accountNumber;
 
+    @Column(nullable = false, length = 100)
+    private String accountHolderName;
+
+    @Column(nullable = false, length = 100)
+    private String bankName;
+
+    @Column(nullable = false, length = 9)
+    private String routingNumber;
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private AccountType accountType;
 
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 3)
     private String currency = "USD";
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(nullable = false, updatable = false)
@@ -61,15 +63,10 @@ public class Accounts {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false)
-    private Boolean isActive = true; // Default to true
+    private Boolean isActive = true;
 
     @Column(nullable = false)
-    private Boolean isDeleted = false; // Default to false
-
-    // Foreign key to User in same service
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private Boolean isDeleted = false;
 
     @PrePersist
     protected void onCreate() {

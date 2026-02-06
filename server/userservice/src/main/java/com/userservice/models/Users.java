@@ -73,9 +73,6 @@ public class Users {
     @Column(nullable = false)
     private Boolean isDeleted = false; // Default to false
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Accounts> accounts;
-
     // Auto-set timestamps on creation and update
     @PrePersist
     protected void onCreate() {

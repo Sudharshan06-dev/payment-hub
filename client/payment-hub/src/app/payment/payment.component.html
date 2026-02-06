@@ -73,11 +73,11 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                formControlName="agreeTerms"
+                [(ngModel)]="agreeTerms"
                 class="checkbox-input"
               />
               <span class="checkbox-text">
-                I agree to pay
+                I agree to pay 
                 <strong>{{ formatCurrency(bill?.amount) }}</strong>
                 to
                 <strong>{{ bill?.biller_name }}</strong>
@@ -98,7 +98,7 @@
           <button
             class="btn btn-primary"
             (click)="proceedToPayment()"
-            [disabled]="!paymentForm.get('agreeTerms')?.value || isProcessing"
+            [disabled]="!agreeTerms"
           >
             Continue to Payment
             <span class="material-icons">arrow_forward</span>

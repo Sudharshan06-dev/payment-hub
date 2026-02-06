@@ -1,4 +1,19 @@
-// src/app/models/account.model.ts
+export interface Account {
+  accountId?: number;
+  accountNumber: string;
+  accountHolderName: string;
+  bankName: string;
+  routingNumber: string;
+  accountType: AccountType | string;
+  balance: number;
+  currency: string;
+  status: AccountStatus | string;
+  isActive: boolean;
+  isDeleted?: boolean;
+  userId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 export enum AccountType {
   CHECKING = 'CHECKING',
@@ -11,46 +26,4 @@ export enum AccountStatus {
   INACTIVE = 'INACTIVE',
   FROZEN = 'FROZEN',
   CLOSED = 'CLOSED'
-}
-
-export interface Account {
-  accountId?: number;
-  accountNumber: string;
-  accountType: AccountType;
-  balance: number;
-  currency: string;
-  status: AccountStatus;
-  createdAt?: string;
-  updatedAt?: string;
-  isActive: boolean;
-  isDeleted?: boolean;
-  userId?: number;
-}
-
-export interface AccountResponse {
-  success: boolean;
-  message: string;
-  data: Account;
-}
-
-export interface AccountsListResponse {
-  success: boolean;
-  message: string;
-  data: Account[];
-}
-
-export interface CreateAccountRequest {
-  accountNumber: string;
-  accountType: AccountType;
-  balance: number;
-  currency: string;
-}
-
-export interface UpdateAccountRequest {
-  accountNumber?: string;
-  accountType?: AccountType;
-  balance?: number;
-  currency?: string;
-  status?: AccountStatus;
-  isActive?: boolean;
 }
