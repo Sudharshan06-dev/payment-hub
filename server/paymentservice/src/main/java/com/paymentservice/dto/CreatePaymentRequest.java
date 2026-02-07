@@ -13,6 +13,7 @@ public class CreatePaymentRequest {
     private Long userId;
     private Long billId;
     private Long accountId;
+    private String userEmail;
     private BigDecimal amount;
     private JsonNode paymentDetails;
     private String currency;

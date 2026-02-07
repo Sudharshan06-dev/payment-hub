@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,11 +16,17 @@ import com.paymentservice.models.Payments;
 import com.paymentservice.models.Payments.PaymentStatus;
 import com.paymentservice.repositories.AccountsRepository;
 import com.paymentservice.repositories.PaymentRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentservice.dto.CreatePaymentRequest;
+import com.paymentservice.event.PaymentEvent;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class PaymentsService {
 
     @Autowired
@@ -30,6 +37,8 @@ public class PaymentsService {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    private final KafkaTemplate<String, PaymentEvent> kafkaTemplate;
 
     /**
      * Create a new payment
@@ -61,33 +70,47 @@ public class PaymentsService {
 
         payment.setUserId(request.getUserId());
         payment.setBillId(request.getBillId());
-        payment.setAccountId(request.getAccountId() != null ? request.getAccountId() : null);
+        payment.setAccountId(request.getAccountId());
         payment.setAmount(request.getAmount());
-        payment.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
+        payment.setCurrency(
+                request.getCurrency() != null ? request.getCurrency() : "USD");
 
         if (request.getPaymentDetails() != null) {
             try {
                 payment.setPaymentDetails(
                         objectMapper.writeValueAsString(request.getPaymentDetails()));
-            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Failed to serialize payment details", e);
             }
         }
 
-        payment.setPaymentDate(java.time.LocalDateTime.now());
+        LocalDateTime paymentDate = LocalDateTime.now();
+        payment.setPaymentDate(paymentDate);
+
         payment.setPaymentMethod(request.getPaymentMethod());
         payment.setStatus(PaymentStatus.INITIATED);
-        payment.setTransactionReference("TXN-" + UUID.randomUUID());
 
-        if (request.getPaymentMethod() == "CREDIT_CARD") {
-            BigDecimal remaining_balance = balance.subtract(request.getAmount()).setScale(2, RoundingMode.HALF_UP);
-            accounts.setBalance(remaining_balance);
+        String transactionReference = "TXN-" + UUID.randomUUID();
+        payment.setTransactionReference(transactionReference);
+
+        if ("BANK_ACCOUNT".equals(request.getPaymentMethod())) {
+            BigDecimal remainingBalance = balance.subtract(request.getAmount())
+                    .setScale(2, RoundingMode.HALF_UP);
+            accounts.setBalance(remainingBalance);
         }
 
         Payments savedPayment = paymentRepository.save(payment);
 
-        // TODO: Publish PaymentInitiated event here
-        // eventPublisher.publishEvent(new PaymentInitiatedEvent(savedPayment));
+        // Publish Kafka event AFTER persistence
+        PaymentEvent paymentEvent = new PaymentEvent(
+                transactionReference,
+                savedPayment.getPaymentMethod(),
+                request.getUserEmail(),
+                paymentDate,
+                savedPayment.getAmount()
+                );
+
+        kafkaTemplate.send("payment-confirmation", paymentEvent);
 
         return savedPayment;
     }
@@ -99,16 +122,6 @@ public class PaymentsService {
     public Payments getPaymentById(Long paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
-
-        // 2. Decode the JSON string into a List of Accounts objects
-        // try {
-        // String jsonString = payment.getPaymentDetails();
-        // return objectMapper.readValue(jsonString, new
-        // TypeReference<Optional<Payments>>() {
-        // });
-        // } catch (JsonProcessingException e) {
-        // throw new RuntimeException("Failed to decode payment details", e);
-        // }
     }
 
     /**

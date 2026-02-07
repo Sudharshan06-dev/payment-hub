@@ -31,6 +31,7 @@ export class PaymentComponent implements OnInit {
 
   private _bill: Bill | null = null;
   private user_id: number = 0;
+  private user_email: string = "";
 
   @Input()
   set bill(value: Bill | null) {
@@ -71,6 +72,7 @@ export class PaymentComponent implements OnInit {
     private toasterService: ToasterHelper
   ) {
     this.user_id = this.localStorageHelper.getItem('user_details')?.userId;
+    this.user_email = this.localStorageHelper.getItem('user_details')?.email;
   }
 
   ngOnInit(): void {
@@ -278,6 +280,7 @@ export class PaymentComponent implements OnInit {
       paymentRequest = {
         billId: this.bill?.bill_id,
         userId: this.user_id,
+        userEmail: this.user_email,
         paymentDetails: this.accounts,
         amount: this.bill?.amount,
         accountId: this.selectedAccount?.accountId,
@@ -287,6 +290,7 @@ export class PaymentComponent implements OnInit {
       paymentRequest = {
         billId: this.bill?.bill_id,
         userId: this.user_id,
+        userEmail: this.user_email,
         amount: this.bill?.amount,
         paymentDetails: [{
           cardNumber: formValue.cardNumber,
