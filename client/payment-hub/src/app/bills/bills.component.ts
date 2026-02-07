@@ -453,7 +453,7 @@ export class BillsComponent implements OnInit, OnDestroy {
             this.updatePagination();
             this.loadBillStatistics();
             this.getTotalAmountOwed();
-            this.toastService.success('Bill marked as paid successfully');
+            this.toastService.success({title: "Success", message: response?.message});
           }
         }
       },

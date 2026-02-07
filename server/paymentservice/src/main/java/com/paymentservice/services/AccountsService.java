@@ -44,7 +44,7 @@ public class AccountsService {
         return this.userRequest;
     }
 
-    public List<Accounts> getAllAccountsByUserId(Long userId, HttpServletRequest request) {
+    public Optional<Accounts> getAllAccountsByUserId(Long userId, HttpServletRequest request) {
         log.info("Fetching all accounts for user: {}", userId);
 
         String token = extractToken(request);
@@ -64,7 +64,7 @@ public class AccountsService {
                 .orElseThrow(() -> new RuntimeException("Account not found or access denied"));
     }
 
-    public List<Accounts> getActiveAccounts(Long userId) {
+    public Optional<Accounts> getActiveAccounts(Long userId) {
         log.info("Fetching active accounts for user: {}", userId);
         return accountsRepository.findActiveAccountsByUserId(userId);
     }

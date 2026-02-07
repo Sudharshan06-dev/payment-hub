@@ -108,107 +108,171 @@
 
       <!-- Payment Step -->
       <div *ngIf="paymentStep === 'payment'" class="step-container">
-        <h3 class="step-title">Enter Payment Method</h3>
+        <h3 class="step-title">Choose Payment Method</h3>
+
+        <!-- Payment Method Selector -->
+        <div class="payment-method-selector">
+          <button
+            class="payment-method-btn"
+            [class.active]="paymentMethod === 'account'"
+            (click)="switchPaymentMethod('account')"
+            [disabled]="isProcessing || accounts.length === 0"
+          >
+            <span class="material-icons">account_balance</span>
+            <span>Bank Account</span>
+            <span *ngIf="accounts.length === 0" class="badge-small">No accounts</span>
+          </button>
+          <button
+            class="payment-method-btn"
+            [class.active]="paymentMethod === 'card'"
+            (click)="switchPaymentMethod('card')"
+            [disabled]="isProcessing"
+          >
+            <span class="material-icons">credit_card</span>
+            <span>Credit/Debit Card</span>
+          </button>
+        </div>
 
         <form [formGroup]="paymentForm" class="payment-form">
-          <!-- Cardholder Name -->
-          <div class="form-group">
-            <label class="form-label">Cardholder Name</label>
-            <input
-              type="text"
-              formControlName="cardholderName"
-              class="form-input"
-              placeholder="John Doe"
-              [disabled]="isProcessing"
-            />
-            <span
-              *ngIf="
-                paymentForm.get('cardholderName')?.invalid &&
-                paymentForm.get('cardholderName')?.touched
-              "
-              class="error-text"
-            >
-              Please enter a valid name
-            </span>
-          </div>
-
-          <!-- Card Number -->
-          <div class="form-group">
-            <label class="form-label">Card Number</label>
-            <div class="card-input-wrapper">
-              <input
-                type="text"
-                formControlName="cardNumber"
-                (input)="onCardNumberChange($event)"
-                class="form-input card-input"
-                placeholder="1234 5678 9012 3456"
-                [disabled]="isProcessing"
-                maxlength="23"
-              />
-              <span class="material-icons card-icon">{{ cardTypeIcon }}</span>
+          <!-- Bank Account Payment -->
+          <div *ngIf="paymentMethod === 'account'" class="payment-section">
+            <div *ngIf="isLoadingAccounts" class="loading-accounts">
+              <div class="spinner-small"></div>
+              <p>Loading accounts...</p>
             </div>
-            <span
-              *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched"
-              class="error-text"
-            >
-              Please enter a valid card number
-            </span>
+
+            <div *ngIf="!isLoadingAccounts && accounts.length > 0" class="accounts-list">
+              <h4 class="section-subtitle">Select Account</h4>
+              <div
+                *ngFor="let account of accounts"
+                class="account-card"
+                [class.selected]="selectedAccount?.accountId === account.accountId"
+                (click)="selectAccount(account)"
+              >
+                <div class="account-card-header">
+                  <div class="account-icon">
+                    <span class="material-icons">account_balance</span>
+                  </div>
+                  <div class="account-info">
+                    <h5 class="account-name">{{ account.accountHolderName }}</h5>
+                    <p class="account-bank">{{ account.bankName }}</p>
+                    <p class="account-number">{{ maskAccountNumber(account.accountNumber) }}</p>
+                  </div>
+                </div>
+                <div class="account-card-footer">
+                  <span class="account-balance">{{ formatCurrency(account.balance) }}</span>
+                  <span class="account-type badge">{{ account.accountType }}</span>
+                </div>
+                <div class="selected-indicator" *ngIf="selectedAccount?.accountId === account.accountId">
+                  <span class="material-icons">check_circle</span>
+                </div>
+              </div>
+
+              <div *ngIf="selectedAccount && selectedAccount.balance < (bill?.amount || 0)" class="alert alert-warning">
+                <span class="material-icons">warning</span>
+                <span>Insufficient balance in selected account</span>
+              </div>
+            </div>
+
+            <div *ngIf="!isLoadingAccounts && accounts.length === 0" class="no-accounts">
+              <span class="material-icons">account_balance_wallet</span>
+              <p>No bank accounts found</p>
+              <p class="text-muted">Please add a bank account in Settings or use card payment</p>
+            </div>
           </div>
 
-          <!-- Expiry & CVV Row -->
-          <div class="form-row">
+          <!-- Card Payment -->
+          <div *ngIf="paymentMethod === 'card'" class="payment-section">
+            <!-- Cardholder Name -->
             <div class="form-group">
-              <label class="form-label">Expiry Date</label>
+              <label class="form-label">Cardholder Name</label>
               <input
                 type="text"
-                formControlName="expiry"
-                (input)="onExpiryChange($event)"
+                formControlName="cardHolderName"
                 class="form-input"
-                placeholder="MM/YY"
+                placeholder="John Doe"
                 [disabled]="isProcessing"
-                maxlength="5"
               />
               <span
-                *ngIf="paymentForm.get('expiry')?.invalid && paymentForm.get('expiry')?.touched"
+                *ngIf="paymentForm.get('cardHolderName')?.invalid && paymentForm.get('cardHolderName')?.touched"
                 class="error-text"
               >
-                Format: MM/YY
+                Please enter a valid name
               </span>
             </div>
 
+            <!-- Card Number -->
             <div class="form-group">
-              <label class="form-label">CVV</label>
-              <input
-                type="text"
-                formControlName="cvv"
-                (input)="onCVVChange($event)"
-                class="form-input"
-                placeholder="123"
-                [disabled]="isProcessing"
-                inputmode="numeric"
-                maxlength="4"
-              />
+              <label class="form-label">Card Number</label>
+              <div class="card-input-wrapper">
+                <input
+                  type="text"
+                  formControlName="cardNumber"
+                  (input)="onCardNumberChange($event)"
+                  class="form-input card-input"
+                  placeholder="1234 5678 9012 3456"
+                  [disabled]="isProcessing"
+                  maxlength="23"
+                />
+                <span class="material-icons card-icon">credit_card</span>
+              </div>
               <span
-                *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched"
+                *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched"
                 class="error-text"
               >
-                3-4 digits
+                Please enter a valid card number (13-19 digits)
               </span>
             </div>
-          </div>
 
-          <!-- Security Notice -->
-          <p class="security-notice">
-            <span class="material-icons">lock</span>
-            Your payment information is encrypted and secure
-          </p>
+            <!-- Expiry & CVV Row -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Expiry Date</label>
+                <input
+                  type="text"
+                  formControlName="expiry"
+                  (input)="onExpiryChange($event)"
+                  class="form-input"
+                  placeholder="MM/YY"
+                  [disabled]="isProcessing"
+                  maxlength="5"
+                />
+                <span
+                  *ngIf="paymentForm.get('expiry')?.invalid && paymentForm.get('expiry')?.touched"
+                  class="error-text"
+                >
+                  Format: MM/YY
+                </span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">CVV</label>
+                <input
+                  type="text"
+                  formControlName="cvv"
+                  (input)="onCVVChange($event)"
+                  class="form-input"
+                  placeholder="123"
+                  [disabled]="isProcessing"
+                  inputmode="numeric"
+                  maxlength="4"
+                />
+                <span
+                  *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched"
+                  class="error-text"
+                >
+                  3-4 digits
+                </span>
+              </div>
+            </div>
+
+            <!-- Security Notice -->
+            <p class="security-notice">
+              <span class="material-icons">lock</span>
+              Your payment information is encrypted and secure
+            </p>
+          </div>
         </form>
-
-        <!-- Error -->
-        <div *ngIf="error" class="alert alert-danger">
-          <span class="material-icons">error</span>
-          <span>{{ error }}</span>
-        </div>
 
         <!-- Action Buttons -->
         <div class="modal-actions">
@@ -219,7 +283,11 @@
           <button
             class="btn btn-primary"
             (click)="submitPayment()"
-            [disabled]="paymentForm.invalid || isProcessing"
+            [disabled]="
+              isProcessing ||
+              (paymentMethod === 'account' && (!selectedAccount || selectedAccount.balance < (bill?.amount || 0))) ||
+              (paymentMethod === 'card' && paymentForm.invalid)
+            "
           >
             <span *ngIf="isProcessing" class="spinner-small"></span>
             {{ isProcessing ? 'Processing...' : 'Pay ' + formatCurrency(bill?.amount) }}
@@ -241,17 +309,25 @@
             <strong>{{ formatCurrency(bill?.amount) }}</strong>
             to
             <strong>{{ bill?.biller_name }}</strong>
-            has been initiated.
+            has been processed successfully.
           </p>
 
           <div class="confirmation-details">
             <p>
               <span class="material-icons">info</span>
-              Your payment will be settled and reflected in your account within 24 hours.
+              Payment method: {{ paymentMethod === 'account' ? 'Bank Account' : 'Credit Card' }}
+            </p>
+            <p *ngIf="paymentMethod === 'account'">
+              <span class="material-icons">account_balance</span>
+              {{ selectedAccount?.bankName }} - {{ maskAccountNumber(selectedAccount?.accountNumber || '') }}
+            </p>
+            <p>
+              <span class="material-icons">schedule</span>
+              Payment will be settled within 24 hours
             </p>
             <p>
               <span class="material-icons">mail</span>
-              A confirmation email has been sent to your registered email address.
+              Confirmation email sent
             </p>
           </div>
 

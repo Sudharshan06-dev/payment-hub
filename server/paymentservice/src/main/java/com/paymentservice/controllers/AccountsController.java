@@ -1,7 +1,7 @@
 package com.paymentservice.controllers;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,17 +31,17 @@ public class AccountsController {
     private AccountsService accountsService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<AccountResponse<List<Accounts>>> getAllAccounts(
+    public ResponseEntity<AccountResponse<Optional<Accounts>>> getAllAccounts(
             @PathVariable Long userId, 
             HttpServletRequest request) {
         
         log.info("GET request: Fetch all accounts for user: {}", userId);
         
         try {
-            List<Accounts> accounts = accountsService.getAllAccountsByUserId(userId, request);
+            Optional<Accounts> accounts = accountsService.getAllAccountsByUserId(userId, request);
             
             return ResponseEntity.ok(
-                AccountResponse.<List<Accounts>>builder()
+                AccountResponse.<Optional<Accounts>>builder()
                     .success(true)
                     .message("Accounts retrieved successfully")
                     .data(accounts)
@@ -50,7 +50,7 @@ public class AccountsController {
         } catch (RuntimeException e) {
             log.error("Error fetching accounts for user: {}", userId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                AccountResponse.<List<Accounts>>builder()
+                AccountResponse.<Optional<Accounts>>builder()
                     .success(false)
                     .message(e.getMessage())
                     .data(null)

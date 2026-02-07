@@ -1,4 +1,4 @@
-package com.paymentservice.controllers;
+package com.settlementservice.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.paymentservice.dto.LedgerResponse;
-import com.paymentservice.models.AccountLedger;
-import com.paymentservice.models.AccountLedger.TransactionType;
-import com.paymentservice.services.AccountLedgerService;
+import com.settlementservice.models.AccountLedger;
+import com.settlementservice.models.AccountLedger.TransactionType;
+import com.settlementservice.service.AccountLedgerService;
+import com.settlementservice.dto.LedgerResponse;
 
 @RestController
 @RequestMapping("/api/v1/ledger")

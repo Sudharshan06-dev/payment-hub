@@ -1,13 +1,12 @@
-package com.paymentservice.services;
-
+package com.settlementservice.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.paymentservice.models.AccountLedger;
-import com.paymentservice.models.AccountLedger.TransactionType;
-import com.paymentservice.repositories.AccountLedgerRepository;
+import com.settlementservice.models.AccountLedger;
+import com.settlementservice.models.AccountLedger.TransactionType;
+import com.settlementservice.respository.AccountLedgerRepository;
 
 @Service
 @Transactional

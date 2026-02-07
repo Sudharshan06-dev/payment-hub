@@ -53,7 +53,7 @@ public class Accounts {
     private String currency = "USD";
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = true, length = 20)
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(nullable = false, updatable = false)

@@ -35,9 +35,8 @@
                 </div>
               </div>
 
-              <button class="btn btn-light btn-sm d-flex align-items-center gap-2"
-                      (click)="addNewAccount()"
-                      [disabled]="isFormVisible">
+              <button class="btn btn-light btn-sm d-flex align-items-center gap-2" (click)="addNewAccount()"
+                [disabled]="isFormVisible">
                 <i class="fas fa-plus"></i>
                 <span class="d-none d-md-inline">Add Account</span>
               </button>
@@ -47,16 +46,10 @@
           <!-- Card Body -->
           <div class="card-body">
             <!-- Loading State -->
-            <div *ngIf="isLoadingAccounts" class="state-wrapper text-center py-5">
-              <div class="spinner-border text-primary mb-3" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-              <p class="text-muted mb-0">Loading your accounts...</p>
-            </div>
 
             <!-- Empty State -->
-            <div *ngIf="!isLoadingAccounts && accounts.length === 0 && !isFormVisible"
-                 class="state-wrapper text-center py-5">
+            <div *ngIf="!accounts && !isFormVisible"
+              class="state-wrapper text-center py-5">
               <div class="empty-icon mb-3">
                 <i class="fas fa-wallet"></i>
               </div>
@@ -70,8 +63,7 @@
             </div>
 
             <!-- Accounts Table -->
-            <div *ngIf="!isLoadingAccounts && accounts.length > 0 && !isFormVisible"
-                 class="table-wrapper">
+            <div *ngIf="accounts && !isFormVisible" class="table-wrapper">
               <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                   <thead>
@@ -85,58 +77,59 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr *ngFor="let account of accounts">
                       <td>
                         <div class="d-flex flex-column">
                           <span class="account-label">Account Number</span>
                           <code class="account-code">
-                            {{ maskAccountNumber(account.accountNumber) }}
+                            {{ maskAccountNumber(accounts.accountNumber) }}
                           </code>
-                          <small class="text-muted mt-1" *ngIf="account.accountHolderName">
-                            {{ account.accountHolderName }}
+                          <small class="text-muted mt-1" *ngIf="accounts.accountHolderName">
+                            {{ accounts.accountHolderName }}
                           </small>
                         </div>
                       </td>
 
                       <td>
-                        <span class="fw-medium">{{ account.bankName || 'N/A' }}</span>
+                        <span class="fw-medium">{{ accounts.bankName || 'N/A' }}</span>
                       </td>
 
                       <td>
                         <span class="badge bg-soft-info">
                           <i class="fas fa-university me-1"></i>
-                          {{ account.accountType }}
+                          {{ accounts.accountType }}
                         </span>
                       </td>
 
                       <td class="text-end">
                         <span class="fw-semibold text-success">
-                          {{ formatCurrency(account.balance, account.currency) }}
+                          {{ formatCurrency(accounts.balance, accounts.currency) }}
                         </span>
                       </td>
 
                       <td class="text-center">
-                        <span class="badge" [ngClass]="getStatusBadgeClass(account.status)">
+                        <span class="badge" [ngClass]="getStatusBadgeClass(accounts.status)">
                           <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>
-                          {{ account.status }}
+                          {{ accounts.status }}
                         </span>
                       </td>
 
                       <td class="text-end">
-                        <div class="btn-group" role="group">
-                          <button class="btn btn-sm btn-outline-primary"
-                                  (click)="editAccount(account)"
-                                  title="Edit account">
+                        <div class="btn-group" role="group" aria-label="Account actions">
+                          <button type="button"
+                            class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                            (click)="editAccount(accounts)" title="Edit account">
                             <i class="fas fa-edit"></i>
+                            <span class="d-none d-sm-inline">Edit</span>
                           </button>
-                          <button class="btn btn-sm btn-outline-danger"
-                                  (click)="deleteAccount(account)"
-                                  title="Delete account">
+
+                          <button type="button"
+                            class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1"
+                            (click)="deleteAccount(accounts)" title="Delete account">
                             <i class="fas fa-trash-alt"></i>
+                            <span class="d-none d-sm-inline">Delete</span>
                           </button>
                         </div>
                       </td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -155,11 +148,7 @@
                       {{ isEditMode ? 'Update your account information' : 'Enter your bank account details' }}
                     </p>
                   </div>
-                  <button type="button"
-                          class="btn-close"
-                          (click)="cancelForm()"
-                          [disabled]="isSubmitting"
-                          aria-label="Close"></button>
+                  <button type="button" class="btn-close" (click)="cancelForm()" aria-label="Close"></button>
                 </div>
               </div>
 
@@ -170,11 +159,7 @@
                     <label for="accountHolderName" class="form-label">
                       Account Holder Name <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      id="accountHolderName"
-                      class="form-control"
-                      formControlName="accountHolderName"
+                    <input type="text" id="accountHolderName" class="form-control" formControlName="accountHolderName"
                       placeholder="John Doe"
                       [class.is-invalid]="accountForm.get('accountHolderName')?.invalid && accountForm.get('accountHolderName')?.touched" />
                     <div class="invalid-feedback">
@@ -187,11 +172,7 @@
                     <label for="bankName" class="form-label">
                       Bank Name <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      id="bankName"
-                      class="form-control"
-                      formControlName="bankName"
+                    <input type="text" id="bankName" class="form-control" formControlName="bankName"
                       placeholder="Chase Bank"
                       [class.is-invalid]="accountForm.get('bankName')?.invalid && accountForm.get('bankName')?.touched" />
                     <div class="invalid-feedback">
@@ -204,13 +185,8 @@
                     <label for="accountNumber" class="form-label">
                       Account Number <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      id="accountNumber"
-                      class="form-control"
-                      formControlName="accountNumber"
-                      placeholder="1234567890"
-                      maxlength="16"
+                    <input type="text" id="accountNumber" class="form-control" formControlName="accountNumber"
+                      placeholder="1234567890" maxlength="16"
                       [class.is-invalid]="accountForm.get('accountNumber')?.invalid && accountForm.get('accountNumber')?.touched" />
                     <div class="invalid-feedback">
                       Enter a valid account number (10-16 digits)
@@ -222,13 +198,8 @@
                     <label for="routingNumber" class="form-label">
                       Routing Number <span class="text-danger">*</span>
                     </label>
-                    <input
-                      type="text"
-                      id="routingNumber"
-                      class="form-control"
-                      formControlName="routingNumber"
-                      placeholder="123456789"
-                      maxlength="9"
+                    <input type="text" id="routingNumber" class="form-control" formControlName="routingNumber"
+                      placeholder="123456789" maxlength="9"
                       [class.is-invalid]="accountForm.get('routingNumber')?.invalid && accountForm.get('routingNumber')?.touched" />
                     <div class="invalid-feedback">
                       Enter a valid 9-digit routing number
@@ -240,10 +211,7 @@
                     <label for="accountType" class="form-label">
                       Account Type <span class="text-danger">*</span>
                     </label>
-                    <select
-                      id="accountType"
-                      class="form-select"
-                      formControlName="accountType">
+                    <select id="accountType" class="form-select" formControlName="accountType">
                       <option value="CHECKING">Checking Account</option>
                       <option value="SAVINGS">Savings Account</option>
                       <option value="MONEY_MARKET">Money Market Account</option>
@@ -255,10 +223,7 @@
                     <label for="currency" class="form-label">
                       Currency <span class="text-danger">*</span>
                     </label>
-                    <select
-                      id="currency"
-                      class="form-select"
-                      formControlName="currency">
+                    <select id="currency" class="form-select" formControlName="currency">
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
@@ -274,73 +239,29 @@
                     </label>
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input
-                        type="number"
-                        id="balance"
-                        class="form-control"
-                        formControlName="balance"
-                        placeholder="0.00"
-                        step="0.01"
-                        min="0"
+                      <input type="number" id="balance" class="form-control" formControlName="balance"
+                        placeholder="0.00" step="0.01" min="0"
                         [class.is-invalid]="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched" />
                     </div>
                     <div class="invalid-feedback d-block"
-                         *ngIf="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched">
+                      *ngIf="accountForm.get('balance')?.invalid && accountForm.get('balance')?.touched">
                       Please enter a valid balance
-                    </div>
-                  </div>
-
-                  <!-- Status -->
-                  <div class="col-md-6">
-                    <label for="status" class="form-label">
-                      Account Status <span class="text-danger">*</span>
-                    </label>
-                    <select
-                      id="status"
-                      class="form-select"
-                      formControlName="status">
-                      <option value="ACTIVE">Active</option>
-                      <option value="INACTIVE">Inactive</option>
-                      <option value="FROZEN">Frozen</option>
-                      <option value="CLOSED">Closed</option>
-                    </select>
-                  </div>
-
-                  <!-- Active Checkbox -->
-                  <div class="col-12">
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="isActive"
-                        formControlName="isActive" />
-                      <label class="form-check-label" for="isActive">
-                        Mark this account as active for transactions
-                      </label>
                     </div>
                   </div>
                 </div>
 
                 <!-- Form Actions -->
                 <div class="form-actions mt-4 pt-4 border-top">
-                  <button type="submit"
-                          class="btn btn-primary px-4"
-                          [disabled]="!isFormValid">
-                    <ng-container *ngIf="!isSubmitting">
+                  <button type="submit" class="btn btn-primary px-4" [disabled]="!isFormValid">
+                    <ng-container>
                       <i class="fas fa-save me-2"></i>{{ formButtonText }}
-                    </ng-container>
-                    <ng-container *ngIf="isSubmitting">
-                      <span class="spinner-border spinner-border-sm me-2"></span>
-                      Saving...
                     </ng-container>
                   </button>
 
-                  <button type="button"
-                          class="btn btn-outline-secondary px-4"
-                          (click)="cancelForm()"
-                          [disabled]="isSubmitting">
+                  <button type="button" class="btn btn-outline-secondary px-4" (click)="cancelForm()">
                     <i class="fas fa-times me-2"></i>Cancel
                   </button>
+
                 </div>
               </form>
             </div>

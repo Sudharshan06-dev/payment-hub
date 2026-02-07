@@ -1,4 +1,4 @@
-package com.paymentservice.dto;
+package com.settlementservice.dto;
 
 public class LedgerResponse {
     private String title;

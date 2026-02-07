@@ -1,6 +1,12 @@
 package com.paymentservice.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,9 +30,9 @@ public class Payments {
     @Column(nullable = false)
     private Long billId;  // From Bill Service (value, not foreign key)
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Long accountId;  // From Account Service (value, not foreign key)
-    
+
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
     
@@ -36,6 +42,9 @@ public class Payments {
     @Column(nullable = false)
     private LocalDateTime paymentDate;
     
+    @Column(name = "payment_details", columnDefinition = "TEXT")  // or VARCHAR(2048) etc.
+    private String paymentDetails;
+
     @Column(nullable = false)
     private String paymentMethod;  // CREDIT_CARD, BANK_TRANSFER, etc.
     
@@ -71,19 +80,5 @@ public class Payments {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-    }
-
-     // Constructor
-    public Payments(Long userId, Long billId, Long accountId, BigDecimal amount, String currency, 
-                        LocalDateTime paymentDate, String paymentMethod, PaymentStatus status, String transactionReference) {
-        this.userId = userId;
-        this.billId = billId;
-        this.accountId = accountId;
-        this.amount = amount;
-        this.currency = currency;
-        this.paymentDate = paymentDate;
-        this.paymentMethod = paymentMethod;
-        this.status = status;
-        this.transactionReference = transactionReference;
     }
 }

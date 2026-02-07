@@ -1291,3 +1291,234 @@
 .modal-content::-webkit-scrollbar-thumb:hover {
   background: #a82030;
 }
+
+/* Payment Method Selector */
+.payment-method-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.payment-method-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  font-size: 14px;
+  font-weight: 600;
+  color: #212529;
+}
+
+.payment-method-btn:hover:not(:disabled) {
+  border-color: #d4292f;
+  background: #fff5f5;
+}
+
+.payment-method-btn.active {
+  border-color: #d4292f;
+  background: #fff5f5;
+  color: #d4292f;
+}
+
+.payment-method-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-method-btn .material-icons {
+  font-size: 28px;
+}
+
+.badge-small {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 2px 8px;
+  background: #fbbf24;
+  color: #78350f;
+  font-size: 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* Payment Section */
+.payment-section {
+  margin-top: 16px;
+}
+
+/* Accounts List */
+.section-subtitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.account-card {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+}
+
+.account-card:hover {
+  border-color: #d4292f;
+  box-shadow: 0 2px 8px rgba(212, 41, 47, 0.1);
+}
+
+.account-card.selected {
+  border-color: #d4292f;
+  background: #fff5f5;
+}
+
+.account-card-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.account-icon {
+  width: 40px;
+  height: 40px;
+  background: #d4292f;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+}
+
+.account-info {
+  flex: 1;
+}
+
+.account-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 4px 0;
+}
+
+.account-bank {
+  font-size: 12px;
+  color: #6c757d;
+  margin: 0 0 2px 0;
+}
+
+.account-number {
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #6c757d;
+  margin: 0;
+}
+
+.account-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+}
+
+.account-balance {
+  font-size: 16px;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.account-type.badge {
+  padding: 4px 12px;
+  background: #e9ecef;
+  color: #212529;
+  font-size: 11px;
+  border-radius: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.selected-indicator {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #d4292f;
+}
+
+.selected-indicator .material-icons {
+  font-size: 24px;
+}
+
+/* Loading & Empty States */
+.loading-accounts {
+  text-align: center;
+  padding: 32px;
+  color: #6c757d;
+}
+
+.no-accounts {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.no-accounts .material-icons {
+  font-size: 48px;
+  color: #e9ecef;
+  margin-bottom: 12px;
+}
+
+.no-accounts p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.text-muted {
+  color: #6c757d;
+  font-size: 13px;
+}
+
+/* Warning Alert */
+.alert.alert-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .payment-method-selector {
+    gap: 8px;
+  }
+
+  .payment-method-btn {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .payment-method-btn .material-icons {
+    font-size: 24px;
+  }
+
+  .account-card {
+    padding: 12px;
+  }
+
+  .account-icon {
+    width: 36px;
+    height: 36px;
+  }
+}

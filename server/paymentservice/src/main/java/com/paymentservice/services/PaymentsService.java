@@ -1,83 +1,123 @@
 package com.paymentservice.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.paymentservice.models.Accounts;
 import com.paymentservice.models.Payments;
 import com.paymentservice.models.Payments.PaymentStatus;
+import com.paymentservice.repositories.AccountsRepository;
 import com.paymentservice.repositories.PaymentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.paymentservice.dto.CreatePaymentRequest;
 
 @Service
 @Transactional
 public class PaymentsService {
-    
+
     @Autowired
     private PaymentRepository paymentRepository;
-        
+
+    @Autowired
+    private AccountsRepository accountsRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /**
      * Create a new payment
      */
     public Payments createPayment(CreatePaymentRequest request) {
-        
+
         // Validate input
         if (request.getAmount() == null || request.getAmount().signum() <= 0) {
             throw new RuntimeException("Amount must be greater than 0");
         }
-        
-        if (request.getAccountId() == null) {
-            throw new RuntimeException("Account ID is required");
-        }
-        
+
         if (request.getUserId() == null) {
             throw new RuntimeException("User ID is required");
         }
-        
+
         if (request.getBillId() == null) {
             throw new RuntimeException("Bill ID is required");
         }
-        
+
+        BigDecimal balance = accountsRepository.getTotalBalanceByUserId(request.getUserId());
+
+        if (balance.compareTo(request.getAmount()) < 0) {
+            throw new RuntimeException("Balance is insufficient");
+        }
+
         // Create payment
         Payments payment = new Payments();
+        Accounts accounts = new Accounts();
+
         payment.setUserId(request.getUserId());
         payment.setBillId(request.getBillId());
-        payment.setAccountId(request.getAccountId());
+        payment.setAccountId(request.getAccountId() != null ? request.getAccountId() : null);
         payment.setAmount(request.getAmount());
         payment.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
+
+        if (request.getPaymentDetails() != null) {
+            try {
+                payment.setPaymentDetails(
+                        objectMapper.writeValueAsString(request.getPaymentDetails()));
+            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                throw new RuntimeException("Failed to serialize payment details", e);
+            }
+        }
+
         payment.setPaymentDate(java.time.LocalDateTime.now());
         payment.setPaymentMethod(request.getPaymentMethod());
         payment.setStatus(PaymentStatus.INITIATED);
         payment.setTransactionReference("TXN-" + UUID.randomUUID());
-        
+
+        if (request.getPaymentMethod() == "CREDIT_CARD") {
+            BigDecimal remaining_balance = balance.subtract(request.getAmount()).setScale(2, RoundingMode.HALF_UP);
+            accounts.setBalance(remaining_balance);
+        }
+
         Payments savedPayment = paymentRepository.save(payment);
-        
+
         // TODO: Publish PaymentInitiated event here
         // eventPublisher.publishEvent(new PaymentInitiatedEvent(savedPayment));
-        
+
         return savedPayment;
     }
-    
+
     /**
+     * xzx
      * Get payment by ID
      */
     public Payments getPaymentById(Long paymentId) {
         return paymentRepository.findById(paymentId)
-            .orElseThrow(() -> new RuntimeException("Payment not found with ID: " + paymentId));
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        // 2. Decode the JSON string into a List of Accounts objects
+        // try {
+        // String jsonString = payment.getPaymentDetails();
+        // return objectMapper.readValue(jsonString, new
+        // TypeReference<Optional<Payments>>() {
+        // });
+        // } catch (JsonProcessingException e) {
+        // throw new RuntimeException("Failed to decode payment details", e);
+        // }
     }
-    
+
     /**
      * Get all payments for a user (paginated)
      */
     public Page<Payments> getAllPaymentsByUser(Long userId, Pageable pageable) {
         return paymentRepository.findAll(pageable); // TODO: Implement custom pagination by userId
     }
-    
+
     /**
      * Get payments by status
      */
@@ -88,7 +128,7 @@ public class PaymentsService {
             throw new RuntimeException("Invalid payment status: " + status);
         }
     }
-    
+
     /**
      * Get user's payments with specific status
      */
@@ -99,53 +139,53 @@ public class PaymentsService {
             throw new RuntimeException("Invalid payment status: " + status);
         }
     }
-    
+
     /**
      * Update payment status
      */
     public Payments updatePaymentStatus(Long paymentId, String newStatus) {
         Payments payment = getPaymentById(paymentId);
-        
+
         try {
             PaymentStatus status = PaymentStatus.valueOf(newStatus.toUpperCase());
             payment.setStatus(status);
-            
+
             Payments updatedPayment = paymentRepository.save(payment);
-            
+
             // TODO: Publish PaymentStatusChanged event
-            //KAFKA FOR FRAUD DETECTION AND NOTIFICATION SERVICE -> IMPORTANT
-            
+            // KAFKA FOR FRAUD DETECTION AND NOTIFICATION SERVICE -> IMPORTANT
+
             return updatedPayment;
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Invalid payment status: " + newStatus);
         }
     }
-    
+
     /**
      * Delete a payment (only if INITIATED)
      */
     public void deletePayment(Long paymentId) {
-        
+
         if (paymentId == null) {
             throw new RuntimeException("Payment ID cannot be null");
         }
-        
+
         Payments payment = getPaymentById(paymentId);
-        
+
         if (!payment.getStatus().equals(PaymentStatus.INITIATED)) {
             throw new RuntimeException("Can only delete INITIATED payments");
         }
-        
+
         paymentRepository.deleteById(paymentId);
     }
-    
+
     /**
      * Get all INITIATED payments (for batch processing)
      */
     public List<Payments> getPendingPaymentsForBatch() {
         return paymentRepository.findByStatusOrderByCreatedAtAsc("INITIATED");
     }
-    
+
     /**
      * Batch update payment status (called by Settlement Service)
      */

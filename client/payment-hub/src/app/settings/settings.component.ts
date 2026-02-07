@@ -9,12 +9,6 @@ import { Account, AccountStatus, AccountType } from '../models/account.model';
 import { ToasterHelper } from '../../services/toast.service';
 import { CommonModule } from '@angular/common';
 
-interface AccountResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
-
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
@@ -22,10 +16,10 @@ interface AccountResponse<T> {
   standalone: true,
   imports: [ReactiveFormsModule, CommonModule]
 })
+
 export class SettingsComponent implements OnInit, OnDestroy {
 
-  accounts: Account[] = [];
-  isLoadingAccounts = false;
+  accounts!: Account;
   readonly API_BASE_PATH = ACCOUNT_PATH;
 
   private userId: number = 0;
@@ -33,7 +27,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   isFormVisible = false;
   isEditMode = false;
   currentEditingAccount: Account | null = null;
-  isSubmitting = false;
 
   AccountType = AccountType;
   AccountStatus = AccountStatus;
@@ -53,7 +46,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.userId) {
-      this.toastr.error('User ID not found. Please login again.');
+      this.toastr.error({title: "Error!", message: 'User ID not found. Please login again.'});
       return;
     }
     this.loadAccounts();
@@ -73,24 +66,19 @@ export class SettingsComponent implements OnInit, OnDestroy {
       accountType: ['CHECKING', Validators.required],
       balance: [0, [Validators.required, Validators.min(0)]],
       currency: ['USD', Validators.required],
-      status: ['ACTIVE', Validators.required],
       isActive: [true]
     });
   }
 
   loadAccounts(): void {
-    this.isLoadingAccounts = true;
     const url = `${this.API_BASE_PATH}/${this.userId}`;
 
     this.accountService.get(url).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.accounts = response.data || [];
-        this.isLoadingAccounts = false;
       },
       error: (error) => {
-        console.error('Error loading accounts:', error);
-        this.toastr.error(error?.error?.message || 'Failed to load accounts');
-        this.isLoadingAccounts = false;
+        this.toastr.error({title: "Error!", message: error?.error?.message});
       }
     });
   }
@@ -125,11 +113,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
   saveAccount(): void {
     if (this.accountForm.invalid) {
       this.markFormGroupTouched(this.accountForm);
-      this.toastr.error('Please fill all required fields correctly');
+      this.toastr.error({title: "Error!", message: 'Please fill all required fields correctly'});
       return;
     }
-
-    this.isSubmitting = true;
 
     if (this.isEditMode && this.currentEditingAccount?.accountId) {
       this.updateAccount();
@@ -146,14 +132,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          this.toastr.success(response.message || 'Account created successfully');
+          this.toastr.success({title: "Success", message: response?.message});
           this.loadAccounts();
           this.cancelForm();
-          this.isSubmitting = false;
         },
         error: (error: any) => {
-          this.toastr.error(error?.error?.message || 'Failed to create account');
-          this.isSubmitting = false;
+          this.toastr.error({title: "Error!", message: error?.error?.message});
         }
       });
   }
@@ -168,14 +152,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          this.toastr.success(response.message || 'Account updated successfully');
+          this.toastr.success({ title: "Success", message: response?.message });
           this.loadAccounts();
           this.cancelForm();
-          this.isSubmitting = false;
         },
         error: (error: any) => {
-          this.toastr.error(error?.error?.message || 'Failed to update account');
-          this.isSubmitting = false;
+          this.toastr.error({title: "Error!", message: error?.error?.message});
         }
       });
   }
@@ -195,11 +177,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          this.toastr.success(response.message || 'Account deleted successfully');
+          this.toastr.success({ title: "Success", message: response?.message }); 
           this.loadAccounts();
         },
         error: (error: any) => {
-          this.toastr.error(error?.error?.message || 'Failed to delete account');
+          this.toastr.error({title: "Error!", message: error?.error?.message});
         }
       });
   }
@@ -228,7 +210,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   get isFormValid(): boolean {
-    return this.accountForm.valid && !this.isSubmitting;
+    return this.accountForm.valid;
   }
 
   get formButtonText(): string {

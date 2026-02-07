@@ -1,4 +1,4 @@
-package com.paymentservice.repositories;
+package com.settlementservice.respository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.paymentservice.models.AccountLedger;
-import com.paymentservice.models.AccountLedger.TransactionType;
+import com.settlementservice.models.AccountLedger;
+import com.settlementservice.models.AccountLedger.TransactionType;
 
 @Repository
 public interface AccountLedgerRepository extends JpaRepository<AccountLedger, Long> {

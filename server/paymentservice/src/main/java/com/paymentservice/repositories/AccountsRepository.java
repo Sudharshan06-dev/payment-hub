@@ -16,7 +16,7 @@ import com.paymentservice.models.Accounts.AccountStatus;
 public interface AccountsRepository extends JpaRepository<Accounts, Long> {
 
     @Query("SELECT a FROM Accounts a WHERE a.userId = :userId AND a.isDeleted = false")
-    List<Accounts> findAllByUserId(@Param("userId") Long userId);
+    Optional<Accounts> findAllByUserId(@Param("userId") Long userId);
 
     @Query("SELECT a FROM Accounts a WHERE a.accountId = :accountId AND a.userId = :userId AND a.isDeleted = false")
     Optional<Accounts> findByAccountIdAndUserId(
@@ -34,10 +34,10 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
     );
 
     @Query("SELECT a FROM Accounts a WHERE a.userId = :userId AND a.status = 'ACTIVE' AND a.isDeleted = false")
-    List<Accounts> findActiveAccountsByUserId(@Param("userId") Long userId);
+    Optional<Accounts> findActiveAccountsByUserId(@Param("userId") Long userId);
 
     @Query("SELECT a FROM Accounts a WHERE a.userId = :userId AND a.status = :status AND a.isDeleted = false")
-    List<Accounts> findByUserIdAndStatus(
+    Optional<Accounts> findByUserIdAndStatus(
         @Param("userId") Long userId,
         @Param("status") AccountStatus status
     );
@@ -57,5 +57,5 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
     BigDecimal getTotalBalanceByUserId(@Param("userId") Long userId);
 
     @Query("SELECT a FROM Accounts a WHERE a.userId = :userId AND a.isDeleted = true")
-    List<Accounts> findDeletedAccountsByUserId(@Param("userId") Long userId);
+    Optional<Accounts> findDeletedAccountsByUserId(@Param("userId") Long userId);
 }
